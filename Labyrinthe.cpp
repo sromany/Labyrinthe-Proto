@@ -162,6 +162,10 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 	printInFileMat(B, "density");
 }
 
+int distanceTreasor(int x, int y){
+	return x - _treasor->_x
+}
+
 int Labyrinthe::countWalls(Mat<char> A){
 
 	int k = 0;
@@ -378,9 +382,9 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 	//
 	createMat(B, lab_width, lab_height);
 
-    	// Position tresor
-    	coord p;
-    	p.i = _treasor._x;
+    // Position tresor
+    coord p;
+    p.i = _treasor._x;
 	p.j = _treasor._y;
 	//
 	int i_x = p.i;

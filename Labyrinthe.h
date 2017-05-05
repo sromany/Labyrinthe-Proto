@@ -100,8 +100,7 @@
             void sortWallsAndPicts(Mat<char> A);
             void sortElements(Mat<char> A);
             void sortMovers(Mat<char> A);
-
-            int distance(Mat<char>& A, int dNew, int i, int j, coord orig);
+            int distanceTreasor(int x, int y);
 
             void makeDensity(Mat<char> A, Mat<int>& B);
             //#s

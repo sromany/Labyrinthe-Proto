@@ -33,6 +33,7 @@ class Gardien : public Mover {
 		static Sound*	_guard_hit;	    // cri du gardien touché.
 		static Sound*	_wall_hit;		// on a tapé un mur.
 		int _pv;
+		int _potentiel;
 		
 	public:
 		Gardien (Labyrinthe* l, int x, int y, const char* modele);
@@ -40,7 +41,7 @@ class Gardien : public Mover {
 		// mon gardien pense très mal!
 		void update (void);
 
-		void potentiel();
+		void compute_potentiel();
 		void seekHunter();
 		bool targetHunter();
 
