@@ -5,6 +5,7 @@
 #include <random>
 //#e
 #include "Gardien.h"
+#include "Chasseur.h"
 //#s
 #include "Labyrinthe.h" 
 
@@ -22,10 +23,11 @@ using namespace std;
 //Constructor
 Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y, l, modele)
 {
+	_pv = 3;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
-	//~ if (_wall_hit == 0)
-		//~ _wall_hit = new Sound ("sons/hit_wall.wav");
+	if (_wall_hit == 0)
+		_wall_hit = new Sound ("sons/hit_wall.wav");
 	fm.hit = false;
 	fm.trigger = false;
 }
@@ -54,7 +56,6 @@ void Gardien::update(void) {
 */	
 	// Ici si le gardien nous voit : fire && wait !
 	// if(seeHunter && targetLock) = seekHunter : faire deux fonctions : champ de vision et turn for fire
-	//_angle = 180;
 	if(fm.trigger == false)
 	{ 
 		fire(0);		
@@ -63,7 +64,7 @@ void Gardien::update(void) {
 	}else{
 		int delay = 1000 * (fd.stop - fd.start)/CLOCKS_PER_SEC;
 		if(fm.hit){
-			if(delay >= 1000){
+			if(delay >= 250){
 				fm.trigger = false;
 			}else{				
 				fd.stop = clock();									
@@ -74,20 +75,19 @@ void Gardien::update(void) {
         //#s
         move(1, 1);
         //#e
-	
+	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 }
 
-/*
+
 // update pontetiel
-void Gardien::potentiel() {
-    _potentiel = this->_l->distance(_x, _y) / this->_l->_totalDistance;
+void Gardien::compute_potentiel() {
+    _potentiel = this->_l->distanceTreasor(_x, _y) / this->_l->_distanceMax;
 }
-*/
+
 
 // et ne bouge pas!
 //#s
 bool Gardien::move (double dx, double dy) { 
-
         vector<pair<int, pair<int, int>>> octants;
         octants.push_back(OCTANT_0);
         octants.push_back(OCTANT_1);
@@ -106,20 +106,18 @@ bool Gardien::move (double dx, double dy) {
 	// int x = (int)((_x + i) / Environnement::scale);
 	//int y = (int)((_y + j) / Environnement::scale);
 
-	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {           
-		
+	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {
             _x += dx * cos(_angle);
             _y += dy * sin(_angle);
-
-            return true;		
-
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
+		return true;		
 	}
 
         //
         setAngle();
-        
-	return false;
 
+	return false;
 }
 //#e
 
@@ -139,22 +137,39 @@ bool Gardien::process_fireball (float dx, float dy)
 	float	x = (_x - _fb -> get_x ()) / Environnement::scale;
 	float	y = (_y - _fb -> get_y ()) / Environnement::scale;
 	float	dist2 = x*x + y*y;
+	
+	int next_x = (int)((_fb -> get_x () + dx) / Environnement::scale);
+	int next_y = (int)((_fb -> get_y () + dy) / Environnement::scale);
+	char value_of_next = _l->data (next_x, next_y);
+	
 	// on bouge que dans le vide !
-	if (EMPTY == _l -> data ((int)((_fb -> get_x () + dx) / Environnement::scale),
-							 (int)((_fb -> get_y () + dy) / Environnement::scale)))
+	if (value_of_next == EMPTY)
 	{
-		//~ message ("Woooshh ..... %d", (int) dist2);
 		// il y a la place.
 		return true;
 	}
+	
+	// Sinon collision...
+	// Si la prochaine case contient du chasseur
+
+	if((int)(_l->_guards[0]->_x / Environnement::scale) == next_x 
+		&& (int)(_l->_guards[0]->_y / Environnement::scale) == next_y){
+		
+		if(((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv > 0){
+		   ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv--;
+			message("Ouch !");
+		}else{
+			partie_terminee(false);
+		}
+	}
+
 	fd.stop = clock();
-	// collision...
+	
 	// calculer la distance maximum en ligne droite.
 	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
 	//~ _wall_hit -> play (1. - dist2/dmax2);
 	fm.hit = true;
-	//~ message ("Booom...");
 	return false;
 }
 
@@ -168,6 +183,7 @@ bool Gardien::targetHunter(){
 	return true;
 }
 //#s
+
 void Gardien::setAngle() {
 
     //https://en.wikipedia.org/wiki/Octant_(solid_geometry)
