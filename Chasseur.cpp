@@ -31,7 +31,7 @@ bool Chasseur::move_aux (double dx, double dy)
 		_x += dx;
 		_y += dy;
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
-		((Labyrinthe *)_l)->setDensity(x,y) density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = CHASSEUR;
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = CHASSEUR;
 		return true;
 	}			
 	return false;
