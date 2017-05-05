@@ -32,8 +32,9 @@ class Gardien : public Mover {
 		static Sound*	_guard_fire;	// bruit de l'arme du gardien.
 		static Sound*	_guard_hit;	    // cri du gardien touché.
 		static Sound*	_wall_hit;		// on a tapé un mur.
-
-
+		int _pv;
+		
+	public:
 		Gardien (Labyrinthe* l, int x, int y, const char* modele);
 
 		// mon gardien pense très mal!

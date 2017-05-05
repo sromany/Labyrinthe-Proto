@@ -5,6 +5,7 @@
 #include <random>
 //#e
 #include "Gardien.h"
+#include "Chasseur.h"
 //#s
 #include "Labyrinthe.h" 
 using namespace std;
@@ -12,6 +13,7 @@ using namespace std;
 //Constructor
 Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y, l, modele)
 {
+	_pv = 3;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
 	if (_wall_hit == 0)
@@ -45,22 +47,25 @@ void Gardien::update(void) {
 	// Ici si le gardien nous voit : fire && wait !
 	// if(seeHunter && targetLock) = seekHunter : faire deux fonctions : champ de vision et turn for fire
 	_angle = 180;
-	if(fm.trigger == false)
-	{ 
-		fire(0);		
-		fm.trigger = true;
-		fm.hit = false;
-	}else{
-		int delay = 1000 * (fd.stop - fd.start)/CLOCKS_PER_SEC;
-		if(fm.hit){
-			if(delay >= 1000){
-				fm.trigger = false;
-			}else{				
-				fd.stop = clock();									
+	if(this->_pv >0){
+		if(fm.trigger == false)
+		{ 
+			
+			fire(0);		
+			fm.trigger = true;
+			fm.hit = false;
+		}else{
+			int delay = 1000 * (fd.stop - fd.start)/CLOCKS_PER_SEC;
+			if(fm.hit){
+				if(delay >= 250){
+					fm.trigger = false;
+				}else{				
+					fd.stop = clock();									
+				}
 			}
 		}
 	}
-	
+	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 }
 
 /*
@@ -77,19 +82,17 @@ bool Gardien::move (double dx, double dy) {
 	int x = (int)((_x + dx) / Environnement::scale);
 	int y = (int)((_y + dy) / Environnement::scale);
 
-	Labyrinthe* l = (Labyrinthe*) _l;
+	//~ Labyrinthe* l = (Labyrinthe*) _l;
 
-	if (l->isAccessible(x, y)) {
+	if (((Labyrinthe *)_l)->isAccessible(x, y)) {
 		
 		_x += dx;
 		_y += dy;
-
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
 		return true;		
-
 	}
-
 	return false;
-
 }
 //#e
 
@@ -109,31 +112,39 @@ bool Gardien::process_fireball (float dx, float dy)
 	float	x = (_x - _fb -> get_x ()) / Environnement::scale;
 	float	y = (_y - _fb -> get_y ()) / Environnement::scale;
 	float	dist2 = x*x + y*y;
+	
+	int next_x = (int)((_fb -> get_x () + dx) / Environnement::scale);
+	int next_y = (int)((_fb -> get_y () + dy) / Environnement::scale);
+	char value_of_next = _l->data (next_x, next_y);
+	
 	// on bouge que dans le vide !
-	if (EMPTY == _l -> data ((int)((_fb -> get_x () + dx) / Environnement::scale),
-							 (int)((_fb -> get_y () + dy) / Environnement::scale)))
+	if (value_of_next == EMPTY)
 	{
-		//~ message ("Woooshh ..... %d", (int) dist2);
 		// il y a la place.
 		return true;
 	}
+	
+	// Sinon collision...
+	// Si la prochaine case contient du chasseur
+
+	if((int)(_l->_guards[0]->_x / Environnement::scale) == next_x 
+		&& (int)(_l->_guards[0]->_y / Environnement::scale) == next_y){
 		
-	if (value_of_next == 2){
-			if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
-			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y)
-			_l->point_de_vie[0]--;
-			
+		if(((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv > 0){
+		   ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv--;
+			message("Ouch !");
+		}else{
+			partie_terminee(false);
 		}
 	}
-	
+
 	fd.stop = clock();
-	// collision...
+	
 	// calculer la distance maximum en ligne droite.
 	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
 	//~ _wall_hit -> play (1. - dist2/dmax2);
 	fm.hit = true;
-	//~ message ("Booom...");
 	return false;
 }
 
@@ -177,9 +188,7 @@ void Gardien::setAngle(int x, int y) {
 		int i = octants[index].second.first;
 		int j = octants[index].second.second;
 		//
-		Labyrinthe* l = (Labyrinthe*) _l;
-		//
-		if (l->isAccessible(x + i, y + j)) {
+		if (((Labyrinthe *)_l)->isAccessible(x + i, y + j)) {
 			//
 			uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 22.5);
 			//

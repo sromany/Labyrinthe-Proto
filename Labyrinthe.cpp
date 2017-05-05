@@ -9,8 +9,9 @@
 Sound*	Chasseur::_hunter_fire;	// bruit de l'arme du chasseur.
 Sound*	Chasseur::_hunter_hit;	// cri du chasseur touché.
 Sound*	Gardien::_guard_fire;	// bruit de l'arme du gardien.
-Sound*	Gardien::_guard_hit;	    // cri du gardien touché.
+Sound*	Gardien::_guard_hit;	// cri du gardien touché.
 Sound*	Chasseur::_wall_hit;	// on a tapé un mur.
+Sound*	Gardien::_wall_hit;	    // un gardien a tapé un mur.
 
 Environnement* Environnement::init (char* filename)
 {
@@ -355,7 +356,7 @@ void Labyrinthe::sortMovers(Mat<char> A){
 		for(int j = 0; j < lab_width; j++){
 			if(A[i][j] == 'C'){
 				_guards[0] = new Chasseur(this, i*Environnement::scale, j*Environnement::scale);
-				point_de_vie[0] = 5;
+				point_de_vie[0] = 1;
 			}
 			if(A[i][j] == 'G'){
 				_guards[k] = new Gardien (this, i*Environnement::scale, j*Environnement::scale, guardianName[g(gen)].c_str()/* Random value i in Guardian Name*/);
@@ -365,47 +366,6 @@ void Labyrinthe::sortMovers(Mat<char> A){
 		}
 	}
 }
-
-int Labyrinthe::distance(Mat<char>& A, int dNew, int i, int j, coord orig) {
-	/*
-	// k = [-1;1]  &&  l = [-1;1]
-		  j
-	+-----------+
-	| 1 | 2 | 3 |
-	+-----------+
-i	| 4 | x | 6 |
-	+-----------+
-	| 7 | 8 | 9 |
-	+-----------+
-	*/
-
-	// Itératif
-
-	// cout << i << "," << j << endl;
-	dNew += 1;
-	if (i > 0 && i < lab_height - 1 && j > 0 && j < lab_width  - 1) {
-
-		for (int k = -1; k <= 1; k++)
-		{
-			for (int l = -1; l <= 1; l++)
-			{
-				if ((k != 0 || l != 0 ) && ((i + k) != orig.i || (j + l) != orig.j)){					// Si on est tout sauf le point du milieu (là d'ou vient l'appel)
-					int dOld = A[i + k][j + l];
-					if (A[i+k][j+l] > 0) {
-						if (dNew < dOld) {
-							A[i + k][j + l] = dNew;		                                                // Sinon A[p.i + k][p.j + l] = nouvelle distance + 1;
-							if (((i + k) > 0 && (i + k) < (lab_height - 1) && (j + l) > 0 && (j + l) < (lab_width - 1)) && (A[i + k][j + l] > 0)) {
-								distance(A, dNew, i + k, j + l, orig);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return dNew;
-}
-
 /**
  ** Ajouter Dijkstra ici !!!
  **/
