@@ -78,12 +78,12 @@ void Gardien::update(void) {
 	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 }
 
-/*
+
 // update pontetiel
-void Gardien::potentiel() {
-    _potentiel = this->_l->distance(_x, _y) / this->_l->_totalDistance;
+void Gardien::compute_potentiel() {
+    _potentiel = this->_l->distanceTreasor(_x, _y) / this->_l->_distanceMax;
 }
-*/
+
 
 // et ne bouge pas!
 //#s
@@ -106,13 +106,12 @@ bool Gardien::move (double dx, double dy) {
 	// int x = (int)((_x + i) / Environnement::scale);
 	//int y = (int)((_y + j) / Environnement::scale);
 
-	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {           
-		
+	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {
             _x += dx * cos(_angle);
             _y += dy * sin(_angle);
-
-            return true;		
-
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
+		return true;		
 	}
 
         //
