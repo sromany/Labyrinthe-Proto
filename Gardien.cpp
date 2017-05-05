@@ -7,6 +7,16 @@
 #include "Gardien.h"
 //#s
 #include "Labyrinthe.h" 
+
+#define OCTANT_0 make_pair(1, make_pair(  0,  1))
+#define OCTANT_1 make_pair(2, make_pair( -1,  1))
+#define OCTANT_2 make_pair(3, make_pair( -1,  0))
+#define OCTANT_3 make_pair(4, make_pair( -1, -1))
+#define OCTANT_4 make_pair(5, make_pair(  0, -1))
+#define OCTANT_5 make_pair(6, make_pair(  1, -1))
+#define OCTANT_6 make_pair(7, make_pair(  1,  0))
+#define OCTANT_7 make_pair(8, make_pair(  1,  1))
+
 using namespace std;
 //#e
 //Constructor
@@ -44,7 +54,7 @@ void Gardien::update(void) {
 */	
 	// Ici si le gardien nous voit : fire && wait !
 	// if(seeHunter && targetLock) = seekHunter : faire deux fonctions : champ de vision et turn for fire
-	_angle = 180;
+	//_angle = 180;
 	if(fm.trigger == false)
 	{ 
 		fire(0);		
@@ -60,6 +70,10 @@ void Gardien::update(void) {
 			}
 		}
 	}
+        
+        //#s
+        move(1, 1);
+        //#e
 	
 }
 
@@ -74,20 +88,36 @@ void Gardien::potentiel() {
 //#s
 bool Gardien::move (double dx, double dy) { 
 
-	int x = (int)((_x + dx) / Environnement::scale);
-	int y = (int)((_y + dy) / Environnement::scale);
+        vector<pair<int, pair<int, int>>> octants;
+        octants.push_back(OCTANT_0);
+        octants.push_back(OCTANT_1);
+        octants.push_back(OCTANT_2);
+        octants.push_back(OCTANT_3);
+        octants.push_back(OCTANT_4);
+        octants.push_back(OCTANT_5);
+        octants.push_back(OCTANT_6);
+        octants.push_back(OCTANT_7);
+    
+        int index = round(_angle / 45);
+            
+        //int i = octants[index].second.first;
+        //int j = octants[index].second.second;
+    
+	// int x = (int)((_x + i) / Environnement::scale);
+	//int y = (int)((_y + j) / Environnement::scale);
 
-	Labyrinthe* l = (Labyrinthe*) _l;
-
-	if (l->isAccessible(x, y)) {
+	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {           
 		
-		_x += dx;
-		_y += dy;
+            _x += dx * cos(_angle);
+            _y += dy * sin(_angle);
 
-		return true;		
+            return true;		
 
 	}
 
+        //
+        setAngle();
+        
 	return false;
 
 }
@@ -138,54 +168,76 @@ bool Gardien::targetHunter(){
 	return true;
 }
 //#s
-void Gardien::setAngle(int x, int y) {
+void Gardien::setAngle() {
 
-	//https://en.wikipedia.org/wiki/Octant_(solid_geometry)
-	vector<pair<int, pair<int, int>>> octants;
-	octants.push_back(make_pair(1, make_pair(  0,  1)));
-	octants.push_back(make_pair(2, make_pair( -1,  1)));
-	octants.push_back(make_pair(3, make_pair( -1,  0)));
-	octants.push_back(make_pair(4, make_pair( -1, -1)));
-	octants.push_back(make_pair(5, make_pair(  0, -1)));
-	octants.push_back(make_pair(6, make_pair(  1, -1)));
-	octants.push_back(make_pair(7, make_pair(  1,  0)));
-	octants.push_back(make_pair(8, make_pair(  1,  1)));
-	//http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
-	//
-	random_device rd; 
-	//
-	mt19937 rng(rd());
-	//	
-	while (!octants.empty()){
+    //https://en.wikipedia.org/wiki/Octant_(solid_geometry)
+    vector<pair<int, pair<int, int>>> octants;
+    octants.push_back(OCTANT_0);
+    octants.push_back(OCTANT_1);
+    octants.push_back(OCTANT_2);
+    octants.push_back(OCTANT_3);
+    octants.push_back(OCTANT_4);
+    octants.push_back(OCTANT_5);
+    octants.push_back(OCTANT_6);
+    octants.push_back(OCTANT_7);
+    
+    //
+    int x = (int) (_x / Environnement::scale);
+    int y = (int) (_y / Environnement::scale);
 
-		//
-		uniform_int_distribution<> cell(0, octants.size()-1);
-		//
-		int index = cell(rng);	
-		//
-		int octant = octants[index].first;
-		//
-		int i = octants[index].second.first;
-		int j = octants[index].second.second;
-		//
-		Labyrinthe* l = (Labyrinthe*) _l;
-		//
-		if (l->isAccessible(x + i, y + j)) {
-			//
-			uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 22.5);
-			//
-			_angle = angle(rng);
-			//
-			if(_angle < 0) {
-				_angle += 360;		
-			}
-			//
-			break;
-		} else {
-			//
-			octants.erase(octants.begin() + index);
-		}
-	}
+    //
+    int index = round(_angle / 45);
+
+    //
+    octants.erase(octants.begin() + index);
+
+    //http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
+    //
+    random_device rd;
+    //
+    mt19937 rng(rd());
+
+    //	
+    while (!octants.empty()) {
+
+        //
+        uniform_int_distribution<> direction(0, octants.size() - 1);
+
+        //
+        index = direction(rng);
+
+        //
+        int octant = octants[index].first;
+
+        //
+        int i = octants[index].second.first;
+        int j = octants[index].second.second;
+
+        //
+        if (((Labyrinthe *) _l)->isAccessible(x + i, y + j)) {
+            
+            //
+            uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
+            
+            //
+            _angle = angle(rng);
+            
+            //
+            if (_angle < 0) {
+                _angle += 360;
+            }
+            
+            //
+            break;
+
+        } else {
+
+            //
+            octants.erase(octants.begin() + index);
+
+        }
+
+    }
 
 }
 //#e
