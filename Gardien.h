@@ -21,7 +21,7 @@ class Labyrinthe;
 class Gardien : public Mover {
 	//#s	
 	private:
-		void setAngle(int x, int y);
+		void setAngle();
 	//#e
 	public:
 		FireMechanics fm;
