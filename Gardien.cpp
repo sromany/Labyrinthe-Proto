@@ -7,6 +7,16 @@
 #include "Gardien.h"
 //#s
 #include "Labyrinthe.h" 
+
+#define OCTANT_0 make_pair(1, make_pair(  0,  1))
+#define OCTANT_1 make_pair(2, make_pair( -1,  1))
+#define OCTANT_2 make_pair(3, make_pair( -1,  0))
+#define OCTANT_3 make_pair(4, make_pair( -1, -1))
+#define OCTANT_4 make_pair(5, make_pair(  0, -1))
+#define OCTANT_5 make_pair(6, make_pair(  1, -1))
+#define OCTANT_6 make_pair(7, make_pair(  1,  0))
+#define OCTANT_7 make_pair(8, make_pair(  1,  1))
+
 using namespace std;
 //#e
 //Constructor
@@ -44,7 +54,7 @@ void Gardien::update(void) {
 */	
 	// Ici si le gardien nous voit : fire && wait !
 	// if(seeHunter && targetLock) = seekHunter : faire deux fonctions : champ de vision et turn for fire
-	_angle = 180;
+	//_angle = 180;
 	if(fm.trigger == false)
 	{ 
 		fire(0);		
@@ -62,7 +72,7 @@ void Gardien::update(void) {
 	}
         
         //#s
-        move(0.1, 0.1);
+        move(1, 1);
         //#e
 	
 }
@@ -78,15 +88,30 @@ void Gardien::potentiel() {
 //#s
 bool Gardien::move (double dx, double dy) { 
 
-	int x = (int)((_x + dx) / Environnement::scale);
-	int y = (int)((_y + dy) / Environnement::scale);
+        vector<pair<int, pair<int, int>>> octants;
+        octants.push_back(OCTANT_0);
+        octants.push_back(OCTANT_1);
+        octants.push_back(OCTANT_2);
+        octants.push_back(OCTANT_3);
+        octants.push_back(OCTANT_4);
+        octants.push_back(OCTANT_5);
+        octants.push_back(OCTANT_6);
+        octants.push_back(OCTANT_7);
+    
+        int index = round(_angle / 45);
+            
+        //int i = octants[index].second.first;
+        //int j = octants[index].second.second;
+    
+	// int x = (int)((_x + i) / Environnement::scale);
+	//int y = (int)((_y + j) / Environnement::scale);
 
-	if (((Labyrinthe *) _l)->isAccessible(x, y)) {
+	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {           
 		
-		_x += dx;
-		_y += dy;
+            _x += dx * cos(_angle);
+            _y += dy * sin(_angle);
 
-		return true;		
+            return true;		
 
 	}
 
@@ -147,22 +172,21 @@ void Gardien::setAngle() {
 
     //https://en.wikipedia.org/wiki/Octant_(solid_geometry)
     vector<pair<int, pair<int, int>>> octants;
-    octants.push_back(make_pair(1, make_pair(  0,  1)));
-    octants.push_back(make_pair(2, make_pair( -1,  1)));
-    octants.push_back(make_pair(3, make_pair( -1,  0)));
-    octants.push_back(make_pair(4, make_pair( -1, -1)));
-    octants.push_back(make_pair(5, make_pair(  0, -1)));
-    octants.push_back(make_pair(6, make_pair(  1, -1)));
-    octants.push_back(make_pair(7, make_pair(  1,  0)));
-    octants.push_back(make_pair(8, make_pair(  1,  1)));
-
+    octants.push_back(OCTANT_0);
+    octants.push_back(OCTANT_1);
+    octants.push_back(OCTANT_2);
+    octants.push_back(OCTANT_3);
+    octants.push_back(OCTANT_4);
+    octants.push_back(OCTANT_5);
+    octants.push_back(OCTANT_6);
+    octants.push_back(OCTANT_7);
+    
     //
     int x = (int) (_x / Environnement::scale);
     int y = (int) (_y / Environnement::scale);
 
     //
     int index = round(_angle / 45);
-    cout << index << "\t" << _angle << "\t" << round(_angle / 45) << endl;
 
     //
     octants.erase(octants.begin() + index);
@@ -177,10 +201,10 @@ void Gardien::setAngle() {
     while (!octants.empty()) {
 
         //
-        uniform_int_distribution<> cell(0, octants.size() - 1);
+        uniform_int_distribution<> direction(0, octants.size() - 1);
 
         //
-        index = cell(rng);
+        index = direction(rng);
 
         //
         int octant = octants[index].first;
