@@ -39,7 +39,7 @@ class Gardien : public Mover {
 		Gardien (Labyrinthe* l, int x, int y, const char* modele);
 
 		// mon gardien pense très mal!
-		void update (void);
+		void update (void);	
 
 		void compute_potentiel();
 		void seekHunter();
@@ -54,3 +54,4 @@ class Gardien : public Mover {
 };
 
 #endif
+

@@ -163,7 +163,7 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 }
 
 int distanceTreasor(int x, int y){
-	return x - _treasor->_x
+	return x - _treasor->_x;
 }
 
 int Labyrinthe::countWalls(Mat<char> A){
