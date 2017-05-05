@@ -11,6 +11,13 @@
 	#include <string>
 	#include <algorithm>
 	#include <regex>
+	
+	#define MUR 1
+	#define CHASSEUR 2
+	#define GARDIEN 3
+	#define BOX 5	
+	#define TRESOR 7
+	
 	using namespace std;
 
 	typedef struct coord {
@@ -64,6 +71,9 @@
             //~ Dimension du labyrinthe
             int lab_width;
             int lab_height;
+            
+            // Point de vies des entité
+            int * point_de_vie;
 
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'

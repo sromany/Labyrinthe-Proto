@@ -14,8 +14,8 @@ Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y,
 {
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
-	//~ if (_wall_hit == 0)
-		//~ _wall_hit = new Sound ("sons/hit_wall.wav");
+	if (_wall_hit == 0)
+		_wall_hit = new Sound ("sons/hit_wall.wav");
 	fm.hit = false;
 	fm.trigger = false;
 }
@@ -117,6 +117,15 @@ bool Gardien::process_fireball (float dx, float dy)
 		// il y a la place.
 		return true;
 	}
+		
+	if (value_of_next == 2){
+			if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
+			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y)
+			_l->point_de_vie[0]--;
+			
+		}
+	}
+	
 	fd.stop = clock();
 	// collision...
 	// calculer la distance maximum en ligne droite.

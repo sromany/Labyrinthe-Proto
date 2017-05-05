@@ -47,6 +47,8 @@ Labyrinthe::Labyrinthe (char* filename){
 
 	// On stock les gardiens et le chasseur
 	_guards = new Mover* [_nguards];
+	point_de_vie = new int [_nguards];
+	
 	// On stock chasseur et les gardiens.
 	sortMovers(ascii);
 
@@ -142,15 +144,15 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 			|| A[i][j] == '|'
 			|| A[i][j] == 'a'
 			|| A[i][j] == 'b') {  // regex match cij ([a-w-yz] ou + ou - ou | ou x ou G ou T
-				B[i][j] = 1;
+				B[i][j] = MUR;
 			}else if(A[i][j] == 'C'){
-				B[i][j] = 2;
+				B[i][j] = CHASSEUR;
 			}else if(A[i][j] == 'G'){
-				B[i][j] = 3;
+				B[i][j] = GARDIEN;
 			}else if(A[i][j] == 'T'){
-				B[i][j] = 7;
+				B[i][j] = TRESOR;
 			}else if(A[i][j] == 'x'){
-				B[i][j] = 5;
+				B[i][j] = BOX;
 			}else{
 				B[i][j] = EMPTY;
 			}
@@ -353,9 +355,11 @@ void Labyrinthe::sortMovers(Mat<char> A){
 		for(int j = 0; j < lab_width; j++){
 			if(A[i][j] == 'C'){
 				_guards[0] = new Chasseur(this, i*Environnement::scale, j*Environnement::scale);
+				point_de_vie[0] = 5;
 			}
 			if(A[i][j] == 'G'){
 				_guards[k] = new Gardien (this, i*Environnement::scale, j*Environnement::scale, guardianName[g(gen)].c_str()/* Random value i in Guardian Name*/);
+				point_de_vie[k] = 3;
 				k++;
 			}
 		}
@@ -473,6 +477,6 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 
 //
 bool Labyrinthe::isAccessible(int x, int y) {
-	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != 1) && (density[x][y] != 7) && (density[x][y] != 5);
+	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != MUR) && (density[x][y] != TRESOR) && (density[x][y] != BOX);
 }
 //#e

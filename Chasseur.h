@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "Mover.h"
-//~ #include "Living.h"
 #include "Sound.h"
 
 class Labyrinthe;
@@ -19,7 +18,6 @@ class Chasseur : public Mover {
 		static Sound*	_hunter_fire;	// bruit de l'arme du chasseur.
 		static Sound*	_hunter_hit;	// cri du chasseur touché.
 		static Sound*	_wall_hit;		// on a tapé un mur.
-		int _pv;
 		
 		Chasseur (Labyrinthe* l, int x, int y);
 

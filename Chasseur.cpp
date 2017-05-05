@@ -6,7 +6,6 @@
 
 Chasseur::Chasseur (Labyrinthe* l, int x, int y) : Mover (x, y, l, 0)
 {
-	_pv = 5;
 	_hunter_fire = new Sound ("sons/hunter_fire.wav");
 	_hunter_hit = new Sound ("sons/hunter_hit.wav");
 	if (_wall_hit == 0)
@@ -42,18 +41,28 @@ bool Chasseur::move_aux (double dx, double dy)
 bool Chasseur::process_fireball (float dx, float dy)
 {
 	// calculer la distance entre le chasseur et le lieu de l'explosion.
-	float	x = (_x - _fb -> get_x ()) / Environnement::scale;
-	float	y = (_y - _fb -> get_y ()) / Environnement::scale;
-	float	dist2 = x*x + y*y;
+	float	next_x = (_x - _fb -> get_x ()) / Environnement::scale;
+	float	next_y = (_y - _fb -> get_y ()) / Environnement::scale;
+	float	dist2 = next_x*next_x + next_y*next_y;
+	char value_of_next = data ((int)((_fb -> get_x () + dx) / Environnement::scale),
+							 (int)((_fb -> get_y () + dy) / Environnement::scale));
 	// on bouge que dans le vide!
-	if (EMPTY == _l -> data ((int)((_fb -> get_x () + dx) / Environnement::scale),
-							 (int)((_fb -> get_y () + dy) / Environnement::scale)))
+
+	if (value_of_next == EMPTY)
 	{
 		message ("Woooshh ..... %d", (int) dist2);
 		// il y a la place.
 		return true;
 	}
 	
+	if (value_of_next == GARDIEN){
+		for(i = 1; i<_l->_nguards; i++){
+			if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
+			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y)
+			_l->point_de_vie[i]--;
+			_l->_guards[i]->tomber();
+		}
+	}
 	// collision...
 	// calculer la distance maximum en ligne droite.
 	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
