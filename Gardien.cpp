@@ -60,6 +60,10 @@ void Gardien::update(void) {
 			}
 		}
 	}
+        
+        //#s
+        move(0.1, 0.1);
+        //#e
 	
 }
 
@@ -77,9 +81,7 @@ bool Gardien::move (double dx, double dy) {
 	int x = (int)((_x + dx) / Environnement::scale);
 	int y = (int)((_y + dy) / Environnement::scale);
 
-	Labyrinthe* l = (Labyrinthe*) _l;
-
-	if (l->isAccessible(x, y)) {
+	if (((Labyrinthe *) _l)->isAccessible(x, y)) {
 		
 		_x += dx;
 		_y += dy;
@@ -88,6 +90,9 @@ bool Gardien::move (double dx, double dy) {
 
 	}
 
+        //
+        setAngle();
+        
 	return false;
 
 }
@@ -138,54 +143,77 @@ bool Gardien::targetHunter(){
 	return true;
 }
 //#s
-void Gardien::setAngle(int x, int y) {
+void Gardien::setAngle() {
 
-	//https://en.wikipedia.org/wiki/Octant_(solid_geometry)
-	vector<pair<int, pair<int, int>>> octants;
-	octants.push_back(make_pair(1, make_pair(  0,  1)));
-	octants.push_back(make_pair(2, make_pair( -1,  1)));
-	octants.push_back(make_pair(3, make_pair( -1,  0)));
-	octants.push_back(make_pair(4, make_pair( -1, -1)));
-	octants.push_back(make_pair(5, make_pair(  0, -1)));
-	octants.push_back(make_pair(6, make_pair(  1, -1)));
-	octants.push_back(make_pair(7, make_pair(  1,  0)));
-	octants.push_back(make_pair(8, make_pair(  1,  1)));
-	//http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
-	//
-	random_device rd; 
-	//
-	mt19937 rng(rd());
-	//	
-	while (!octants.empty()){
+    //https://en.wikipedia.org/wiki/Octant_(solid_geometry)
+    vector<pair<int, pair<int, int>>> octants;
+    octants.push_back(make_pair(1, make_pair(  0,  1)));
+    octants.push_back(make_pair(2, make_pair( -1,  1)));
+    octants.push_back(make_pair(3, make_pair( -1,  0)));
+    octants.push_back(make_pair(4, make_pair( -1, -1)));
+    octants.push_back(make_pair(5, make_pair(  0, -1)));
+    octants.push_back(make_pair(6, make_pair(  1, -1)));
+    octants.push_back(make_pair(7, make_pair(  1,  0)));
+    octants.push_back(make_pair(8, make_pair(  1,  1)));
 
-		//
-		uniform_int_distribution<> cell(0, octants.size()-1);
-		//
-		int index = cell(rng);	
-		//
-		int octant = octants[index].first;
-		//
-		int i = octants[index].second.first;
-		int j = octants[index].second.second;
-		//
-		Labyrinthe* l = (Labyrinthe*) _l;
-		//
-		if (l->isAccessible(x + i, y + j)) {
-			//
-			uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 22.5);
-			//
-			_angle = angle(rng);
-			//
-			if(_angle < 0) {
-				_angle += 360;		
-			}
-			//
-			break;
-		} else {
-			//
-			octants.erase(octants.begin() + index);
-		}
-	}
+    //
+    int x = (int) (_x / Environnement::scale);
+    int y = (int) (_y / Environnement::scale);
+
+    //
+    int index = round(_angle / 45);
+    cout << index << "\t" << _angle << "\t" << round(_angle / 45) << endl;
+
+    //
+    octants.erase(octants.begin() + index);
+
+    //http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
+    //
+    random_device rd;
+    //
+    mt19937 rng(rd());
+
+    //	
+    while (!octants.empty()) {
+
+        //
+        uniform_int_distribution<> cell(0, octants.size() - 1);
+
+        //
+        index = cell(rng);
+
+        //
+        int octant = octants[index].first;
+
+        //
+        int i = octants[index].second.first;
+        int j = octants[index].second.second;
+
+        //
+        if (((Labyrinthe *) _l)->isAccessible(x + i, y + j)) {
+            
+            //
+            uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
+            
+            //
+            _angle = angle(rng);
+            
+            //
+            if (_angle < 0) {
+                _angle += 360;
+            }
+            
+            //
+            break;
+
+        } else {
+
+            //
+            octants.erase(octants.begin() + index);
+
+        }
+
+    }
 
 }
 //#e
