@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "Mover.h"
-//~ #include "Living.h"
 #include "Sound.h"
 
 class Labyrinthe;
@@ -21,6 +20,7 @@ class Chasseur : public Mover {
 		static Sound*	_wall_hit;		// on a tapé un mur.
 		int _pv;
 		
+	public:
 		Chasseur (Labyrinthe* l, int x, int y);
 
 		// ne bouger que dans une case vide (on 'glisse' le long des obstacles)
@@ -30,7 +30,6 @@ class Chasseur : public Mover {
 
 		// le chasseur ne pense pas!
 		void update (void){}; 
-
 
 		// fait bouger la boule de feu (ceci est une exemple, à vous de traiter les collisions spécifiques...)
 		bool process_fireball (float dx, float dy);

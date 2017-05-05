@@ -11,6 +11,13 @@
 	#include <string>
 	#include <algorithm>
 	#include <regex>
+	
+	#define MUR 1
+	#define CHASSEUR 2
+	#define GARDIEN 3
+	#define BOX 5	
+	#define TRESOR 7
+	
 	using namespace std;
 
 	typedef struct coord {
@@ -55,21 +62,25 @@
             //~ Matrice du labyrinthe en ascii
             Mat<char> ascii;
 
-            //~ Matrice de colision
-            Mat<int> density;
-
             //~ Matrice des distance
             Mat<int> distances;
 
             //~ Dimension du labyrinthe
             int lab_width;
-            int lab_height;
+            int lab_height;                      
 
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
             vector<string> texFile;
             vector<char> texTab;
-
+            
+		public:
+			// Point de vies des entité
+			int * point_de_vie;
+						
+            //~ Matrice de colision
+            Mat<int> density;
+			
         public:
             Labyrinthe (char*);
             int width () { return lab_height;}	// retourne la largeur du labyrinthe.
@@ -78,10 +89,11 @@
             {
                 return density[i][j];
             }	// retourne la case (i, j).
-	    bool isAccessible(int x, int y);
+			bool isAccessible(int x, int y);
+			
         private:
-            void readFile(string fname);		 // Lit un fichier .txt et créer le labyrinthe qu'il contient
-            void findTex(char tmp[], const char c);// Parcours les tables de correspondances et crée les affiches
+            void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient
+            void findTex(char tmp[], const char c);   // Parcours les tables de correspondances et crée les affiches
 
             int  countWalls(Mat<char> A);
             void countAllData(Mat<char> A);
