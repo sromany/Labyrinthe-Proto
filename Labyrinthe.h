@@ -61,13 +61,10 @@
         private:
             //~ Matrice du labyrinthe en ascii
             Mat<char> ascii;
-
-            //~ Matrice des distance
-            Mat<int> distances;
-
+	
             //~ Dimension du labyrinthe
             int lab_width;
-            int lab_height;                      
+            int lab_height;           
 
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
@@ -75,11 +72,14 @@
             vector<char> texTab;
             
 		public:
-			// Point de vies des entité
-			int * point_de_vie;
 						
             //~ Matrice de colision
             Mat<int> density;
+            
+            //~ Matrice des distance
+            Mat<int> distances;
+
+			int _distanceMax;
 			
         public:
             Labyrinthe (char*);
@@ -90,6 +90,7 @@
                 return density[i][j];
             }	// retourne la case (i, j).
 			bool isAccessible(int x, int y);
+			int distanceTreasor(int x, int y);
 			
         private:
             void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient
@@ -100,7 +101,7 @@
             void sortWallsAndPicts(Mat<char> A);
             void sortElements(Mat<char> A);
             void sortMovers(Mat<char> A);
-            int distanceTreasor(int x, int y);
+
 
             void makeDensity(Mat<char> A, Mat<int>& B);
             //#s

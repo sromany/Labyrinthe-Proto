@@ -3,6 +3,7 @@
 #include <utility>  
 #include <cmath>
 #include <random>
+//~ #include <stdio.h>
 //#e
 #include "Gardien.h"
 #include "Chasseur.h"
@@ -81,36 +82,49 @@ void Gardien::update(void) {
 
 // update pontetiel
 void Gardien::compute_potentiel() {
-    _potentiel = this->_l->distanceTreasor(_x, _y) / this->_l->_distanceMax;
+    _potentiel = ((Labyrinthe*)_l)->distanceTreasor(_x, _y) / ((Labyrinthe*)_l)->_distanceMax;
 }
 
 
 // et ne bouge pas!
 //#s
 bool Gardien::move (double dx, double dy) { 
-        vector<pair<int, pair<int, int>>> octants;
-        octants.push_back(OCTANT_0);
-        octants.push_back(OCTANT_1);
-        octants.push_back(OCTANT_2);
-        octants.push_back(OCTANT_3);
-        octants.push_back(OCTANT_4);
-        octants.push_back(OCTANT_5);
-        octants.push_back(OCTANT_6);
-        octants.push_back(OCTANT_7);
-    
-        int index = round(_angle / 45);
-            
-        //int i = octants[index].second.first;
-        //int j = octants[index].second.second;
-    
-	// int x = (int)((_x + i) / Environnement::scale);
-	//int y = (int)((_y + j) / Environnement::scale);
+	vector<pair<int, pair<int, int>>> octants;
+	octants.push_back(OCTANT_0);
+	octants.push_back(OCTANT_1);
+	octants.push_back(OCTANT_2);
+	octants.push_back(OCTANT_3);
+	octants.push_back(OCTANT_4);
+	octants.push_back(OCTANT_5);
+	octants.push_back(OCTANT_6);
+	octants.push_back(OCTANT_7);
 
-	if (((Labyrinthe *) _l)->isAccessible((int)(_x + dx * cos(_angle)) / Environnement::scale, (int)(_y +  dy * sin(_angle)) / Environnement::scale)) {
+	int index = round(_angle / 45);
+            
+	float next_x = _x + dx * cos(_angle);
+	float next_y = _y + dy * sin(_angle);
+	
+	if(next_x >= _l->width()){
+		printf("1 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+	}
+	if(next_x < 0){
+		printf("2 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+	}
+	if(next_y < 0){
+		printf("3 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+	}
+	if(next_y >= _l->height()){
+		printf("4 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+	}
+		
+
+	if (((Labyrinthe *) _l)->isAccessible((int)(next_x / Environnement::scale), (int)(next_y / Environnement::scale))) {
             _x += dx * cos(_angle);
             _y += dy * sin(_angle);
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
-		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
+				
+			
+		//~ ((Labyrinthe *)_l)->density[(int)((_x + dx * cos(_angle)) / Environnement::scale)][(int)((_y +  dy * sin(_angle)) / Environnement::scale)] = GARDIEN;
 		return true;		
 	}
 

@@ -48,7 +48,6 @@ Labyrinthe::Labyrinthe (char* filename){
 
 	// On stock les gardiens et le chasseur
 	_guards = new Mover* [_nguards];
-	point_de_vie = new int [_nguards];
 	
 	// On stock chasseur et les gardiens.
 	sortMovers(ascii);
@@ -56,6 +55,8 @@ Labyrinthe::Labyrinthe (char* filename){
 	//#s
 	makePCC(density, distances);
 	//#e
+	
+	printf("%d  x %d\n", width(), height());
 }
 
 void Labyrinthe::readFile(string fname){
@@ -162,8 +163,8 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 	printInFileMat(B, "density");
 }
 
-int distanceTreasor(int x, int y){
-	return x - _treasor->_x;
+int Labyrinthe::distanceTreasor(int x, int y){
+	return x - _treasor._x;
 }
 
 int Labyrinthe::countWalls(Mat<char> A){
@@ -360,11 +361,9 @@ void Labyrinthe::sortMovers(Mat<char> A){
 		for(int j = 0; j < lab_width; j++){
 			if(A[i][j] == 'C'){
 				_guards[0] = new Chasseur(this, i*Environnement::scale, j*Environnement::scale);
-				point_de_vie[0] = 1;
 			}
 			if(A[i][j] == 'G'){
 				_guards[k] = new Gardien (this, i*Environnement::scale, j*Environnement::scale, guardianName[g(gen)].c_str()/* Random value i in Guardian Name*/);
-				point_de_vie[k] = 3;
 				k++;
 			}
 		}
