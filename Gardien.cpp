@@ -57,24 +57,26 @@ void Gardien::update(void) {
 */	
 	// Ici si le gardien nous voit : fire && wait !
 	// if(seeHunter && targetLock) = seekHunter : faire deux fonctions : champ de vision et turn for fire
-	if(fm.trigger == false)
-	{ 
-		fire(0);		
-		fm.trigger = true;
-		fm.hit = false;
-	}else{
-		int delay = 1000 * (fd.stop - fd.start)/CLOCKS_PER_SEC;
-		if(fm.hit){
-			if(delay >= 250){
-				fm.trigger = false;
-			}else{				
-				fd.stop = clock();									
+	if(this->_pv > 0){
+		if(fm.trigger == false)
+		{ 
+			fire(0);		
+			fm.trigger = true;
+			fm.hit = false;
+		}else{
+			int delay = 1000 * (fd.stop - fd.start)/CLOCKS_PER_SEC;
+			if(fm.hit){
+				if(delay >= 250){
+					fm.trigger = false;
+				}else{				
+					fd.stop = clock();									
+				}
 			}
 		}
+			
+			//#s
+		move(1, 1);
 	}
-        
-        //#s
-        move(1, 1);
         //#e
 	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 }
@@ -89,20 +91,21 @@ void Gardien::compute_potentiel() {
 // et ne bouge pas!
 //#s
 bool Gardien::move (double dx, double dy) { 
-	vector<pair<int, pair<int, int>>> octants;
-	octants.push_back(OCTANT_0);
-	octants.push_back(OCTANT_1);
-	octants.push_back(OCTANT_2);
-	octants.push_back(OCTANT_3);
-	octants.push_back(OCTANT_4);
-	octants.push_back(OCTANT_5);
-	octants.push_back(OCTANT_6);
-	octants.push_back(OCTANT_7);
+	//~ vector<pair<int, pair<int, int>>> octants;
+	//~ octants.push_back(OCTANT_0);
+	//~ octants.push_back(OCTANT_1);
+	//~ octants.push_back(OCTANT_2);
+	//~ octants.push_back(OCTANT_3);
+	//~ octants.push_back(OCTANT_4);
+	//~ octants.push_back(OCTANT_5);
+	//~ octants.push_back(OCTANT_6);
+	//~ octants.push_back(OCTANT_7);
 
-	int index = round(_angle / 45);
-            
-	float next_x = _x + dx * cos(_angle);
-	float next_y = _y + dy * sin(_angle);
+	//~ int index = round(_angle / 45);
+	
+	int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
+	int next_y = (int)((_y + dy * sin(_angle)) / Environnement::scale);
+	int next_step = _l -> data (next_x,	next_y);
 	
 	if(next_x >= _l->width()){
 		printf("1 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
@@ -118,18 +121,18 @@ bool Gardien::move (double dx, double dy) {
 	}
 		
 
-	if (((Labyrinthe *) _l)->isAccessible((int)(next_x / Environnement::scale), (int)(next_y / Environnement::scale))) {
-            _x += dx * cos(_angle);
-            _y += dy * sin(_angle);
+	if (((Labyrinthe *) _l)->isAccessible(next_x, next_y)) {
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
-				
-			
-		//~ ((Labyrinthe *)_l)->density[(int)((_x + dx * cos(_angle)) / Environnement::scale)][(int)((_y +  dy * sin(_angle)) / Environnement::scale)] = GARDIEN;
+		_x += dx * cos(_angle);
+        _y += dy * sin(_angle);
+		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
 		return true;		
 	}
 
-        //
-        setAngle();
+    // Set Angle Patrouille
+    setAngle();
+    
+    // Set Angle Defense
 
 	return false;
 }

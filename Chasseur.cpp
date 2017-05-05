@@ -28,9 +28,9 @@ bool Chasseur::move_aux (double dx, double dy)
 	}			
 		
 	if (next_step == EMPTY || next_step == CHASSEUR){
-		_x += dx;
-		_y += dy;
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
+		_x += dx;
+		_y += dy;		
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = CHASSEUR;
 		return true;
 	}			
