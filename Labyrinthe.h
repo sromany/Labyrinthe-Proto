@@ -76,14 +76,11 @@
             vector<char> texTab;
             
 		public:
-						
             //~ Matrice de colision
             Mat<int> density;
             
             //~ Matrice des distance
             Mat<int> distances;
-
-			int _distanceMax;
 			
         public:
             Labyrinthe (char*);
