@@ -3,6 +3,7 @@
 #include <utility>  
 #include <cmath>
 #include <random>
+#include <climits>
 //~ #include <stdio.h>
 //#e
 #include "Gardien.h"
@@ -289,66 +290,96 @@ void Gardien::setAngle() {
     octants.push_back(OCTANT_5);
     octants.push_back(OCTANT_6);
     octants.push_back(OCTANT_7);
+        
+    // Guardian position
+    int x = (int) (_x / Environnement::scale);
+    int y = (int) (_y / Environnement::scale);
+
+    // Octant index
+    int index = round(_angle / 45.f);  
+    
+    // 8 to 0
+    if (index == 8) {
+        index = 0;
+    }
+
+    // Remove octant inaccessible
+    octants.erase(octants.begin() + index);
+        
+    // Minimum distance 
+    int distance_min = INT_MAX;
     
     //
-    coord posGardien;
-    posGardien.x = (int) (_x / Environnement::scale);
-    posGardien.y = (int) (_y / Environnement::scale);
+    index = 0;
+    
+    // Loop all octants
+    for (int i = 0; i < octants.size(); i++) {               
 
-    // 
-    int index = round(_angle / 45);
-
-    // 
-    octants.erase(octants.begin() + index);
-
+        // Retrieve octant position
+        int dx = octants[i].second.first;
+        int dy = octants[i].second.second;
+        
+        // Retrieve octant distance
+        int distance = ((Labyrinthe*) _l)->getDistance(x + dx, y + dy);
+        
+        // Check if octant is accessible
+        if (distance == INT_MAX) {
+          
+            // Remove octant inaccessible
+            octants.erase(octants.begin() + i);
+            
+        } else {
+            
+            // Check if distance is the minimum
+            if (distance < distance_min) {
+            
+                // Update minimum distance
+                distance_min = distance;
+                
+                // Update index octant
+                index = i;
+                
+            }
+            
+        }
+            
+    }
+  
+    
     //http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
     //
     random_device rd;
     //
     mt19937 rng(rd());
-
-    //	
-    while (!octants.empty()) {
-
+    
+    // if (_behavior == DEFENSE) 
+    // Do nothing because the minimum octant is already known
+    
+    //  
+    if (_behavior == PATROUILLE) {
+                       
         //
         uniform_int_distribution<> direction(0, octants.size() - 1);
-
+        
         //
         index = direction(rng);
-
-        //
-        int octant = octants[index].first;
-
-        //
-        int i = octants[index].second.first;
-        int j = octants[index].second.second;
-
-        //
-        if (((Labyrinthe *) _l)->isAccessible(posGardien.x + i, posGardien.y + j)) {
-            
-            //
-            uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
-            
-            //
-            _angle = angle(rng);
-            
-            //
-            if (_angle < 0) {
-                _angle += 360;
-            }
-            if (_angle > 360) {
-                _angle -= 360;
-            }
-            
-            //
-            break;
-
-        } else {
-
-            //
-            octants.erase(octants.begin() + index);
-        }
+        
     }
+    
+    // Retrieve octant
+    int octant = octants[index].first;
+
+    //
+    uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
+            
+    //
+    _angle = angle(rng);
+            
+    //
+    if (_angle < 0) {
+        _angle += 360;
+    }
+    
 }
 //#e
 
