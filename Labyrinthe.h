@@ -88,7 +88,8 @@
             char data (int i, int j)
             {
                 return density[i][j];
-            }	// retourne la case (i, j).
+            }
+            
 			bool isAccessible(int x, int y);
 			int distanceTreasor(int x, int y);
 			
@@ -102,11 +103,8 @@
             void sortElements(Mat<char> A);
             void sortMovers(Mat<char> A);
 
-
             void makeDensity(Mat<char> A, Mat<int>& B);
-            //#s
             void makePCC(Mat<int> A, Mat<int>& B);
-            //#e
             void printInFileMat(const Mat<int>& A, const char* fname);
 
 	};

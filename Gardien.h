@@ -6,6 +6,10 @@
 #include "Mover.h"
 #include "Sound.h"
 
+#define ATTAQUE 50
+#define DEFENSE 25
+#define PATROUILLE -25
+
 // Déclencheurs pour l'action fire des gardiens 
 typedef struct{
 	bool hit, trigger;	
@@ -34,6 +38,7 @@ class Gardien : public Mover {
 		static Sound*	_wall_hit;		// on a tapé un mur.
 		int _pv;
 		int _potentiel;
+		int _mode;
 		
 	public:
 		Gardien (Labyrinthe* l, int x, int y, const char* modele);
