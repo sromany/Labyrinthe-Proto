@@ -41,7 +41,7 @@ cstrike.exe: Labyrinthe.obj Chasseur.obj
 	link -nologo -out:$@ Labyrinthe.obj Chasseur.obj $(WLIBS) -defaultlib:OpenGL.lib
 
 clean:
-	@rm -f cstrike $(O) macstrike cstrike.exe $(OBJ)
+	@rm -f cstrike cstrike64 $(O) macstrike cstrike.exe $(OBJ)
 
 Labyrinthe.o:	Labyrinthe.h Chasseur.h Gardien.h
 Chasseur.o:   Chasseur.cpp Chasseur.h

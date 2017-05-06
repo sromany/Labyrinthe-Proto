@@ -66,6 +66,7 @@ bool Chasseur::process_fireball (float dx, float dy)
 		if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
 			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y){
 				((Gardien *) ((Labyrinthe *)_l)->_guards[i])->_pv--;
+				((Gardien *) ((Labyrinthe *)_l)->_guards[i])->_guard_hit->play();
 				_l->_guards[i]->tomber();
 		}
 	}
