@@ -22,6 +22,7 @@
 
 	typedef struct coord {
 		int i, j;
+		int x, y;
 	}coord;
 
 	/**

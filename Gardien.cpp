@@ -43,7 +43,7 @@ float Gardien::_potentiel_max = 0;
 //Constructor
 Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y, l, modele)
 {
-	_pv = 3;
+	_pv = 2;
 	_behavior = ATTAQUE;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
@@ -70,8 +70,10 @@ void Gardien::update(void) {
             posGardien.i = (int)(gardien->_x / Environnement::scale);
             posGardien.j = (int)(gardien->_y / Environnement::scale);		
             	
-            int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);                        
-            _distance_max = max(_distance_max, distance * gardien->_pv);            
+            int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);
+            if (distance * _pv) {
+				_distance_max = max(_distance_max, distance);    
+			}       
         }
         
     }
@@ -79,17 +81,18 @@ void Gardien::update(void) {
 	coord posGardien;
 	posGardien.i = (int)(_x / Environnement::scale);
     posGardien.j = (int)(_y / Environnement::scale);
-    int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);
-    if(this == _l->_guards[1]) printf("%f , %d\n", _potentiel_max, _distance_max);
+    int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);    
     if (distance * _pv) {
-        _potentiel = distance / _l->width();//_distance_max;
+        _potentiel = distance / _distance_max;
         _potentiel_max += _potentiel;
-    } 
-	
-    if (_potentiel_max < _potentiel + 1) {
-        _behavior = DEFENSE;
-    } else {
-        _behavior = ATTAQUE;
+     
+		printf("%f , %d , %f\n", _potentiel_max, _distance_max, _potentiel);
+		
+		if (_potentiel_max < _potentiel + 1) {
+			_behavior = ATTAQUE;
+		} else {
+			_behavior = DEFENSE;
+		}
     }
  
 /*
@@ -135,6 +138,8 @@ void Gardien::update(void) {
 			//#s		
 		}
 		move(0.5, 0.5);
+	}else{
+		rester_au_sol();
 	}
     //#e
 	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
@@ -151,7 +156,6 @@ bool Gardien::move (double dx, double dy) {
 	//~ octants.push_back(OCTANT_5);
 	//~ octants.push_back(OCTANT_6);
 	//~ octants.push_back(OCTANT_7);
-
 	//~ int index = round(_angle / 45);
 	
 	int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
@@ -224,8 +228,8 @@ bool Gardien::process_fireball (float dx, float dy)
 		next_y = _l->height()-1;
 	}
 	//~ printf("G\n");
-	printf("%d , %d \n",(int)((_fb -> get_x () + dx) / Environnement::scale), 
-						(int)((_fb -> get_y () + dy) / Environnement::scale));
+	//~ printf("%d , %d \n",(int)((_fb -> get_x () + dx) / Environnement::scale), 
+						//~ (int)((_fb -> get_y () + dy) / Environnement::scale));
 	
 	int next_step = _l -> data (next_x,	next_y);
 
@@ -240,20 +244,20 @@ bool Gardien::process_fireball (float dx, float dy)
 	}
 
 	
-	// Sinon collision...
-	// Si la prochaine case contient du chasseur
-
-	//~ if((int)(_l->_guards[0]->_x / Environnement::scale) == next_x 
-		//~ && (int)(_l->_guards[0]->_y / Environnement::scale) == next_y){
+	//~ // Sinon collision...
+	//~ // Si la prochaine case contient du chasseur
+	Chasseur * chasseur = ((Chasseur *) ((Labyrinthe *)_l)->_guards[0]);
+	if((int)(_l->_guards[0]->_x / Environnement::scale) == next_x 
+		&& (int)(_l->_guards[0]->_y / Environnement::scale) == next_y){
 		
-		//~ if(((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv > 0){
-		   //~ ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv--;
-			//~ message("Ouch !");
-		//~ }else{
-			//~ partie_terminee(false);
-		//~ }
-	//~ }
-
+		if(chasseur->_pv > 0){
+		   chasseur->_pv--;
+			message("Ouch !");
+			chasseur->_hunter_hit->play();
+		}else{
+			partie_terminee(false);
+		}
+	}
 	fd.stop = clock();
 	//~ printf("J\n");
 	// calculer la distance maximum en ligne droite.
@@ -291,13 +295,14 @@ void Gardien::setAngle() {
     octants.push_back(OCTANT_7);
     
     //
-    int x = (int) (_x / Environnement::scale);
-    int y = (int) (_y / Environnement::scale);
+    coord posGardien;
+    posGardien.x = (int) (_x / Environnement::scale);
+    posGardien.y = (int) (_y / Environnement::scale);
 
-    //
+    // 
     int index = round(_angle / 45);
 
-    //
+    // 
     octants.erase(octants.begin() + index);
 
     //http://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
@@ -323,7 +328,7 @@ void Gardien::setAngle() {
         int j = octants[index].second.second;
 
         //
-        if (((Labyrinthe *) _l)->isAccessible(x + i, y + j)) {
+        if (((Labyrinthe *) _l)->isAccessible(posGardien.x + i, posGardien.y + j)) {
             
             //
             uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
@@ -335,6 +340,9 @@ void Gardien::setAngle() {
             if (_angle < 0) {
                 _angle += 360;
             }
+            if (_angle > 360) {
+                _angle -= 360;
+            }
             
             //
             break;
@@ -343,11 +351,8 @@ void Gardien::setAngle() {
 
             //
             octants.erase(octants.begin() + index);
-
         }
-
     }
-
 }
 //#e
 
