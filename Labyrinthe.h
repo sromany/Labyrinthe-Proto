@@ -67,7 +67,7 @@
 
             //~ Dimension du labyrinthe
             int lab_width;
-            int lab_height;                      
+            int lab_height;           
 
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
@@ -75,11 +75,14 @@
             vector<char> texTab;
             
 		public:
-			// Point de vies des entité
-			int * point_de_vie;
 						
             //~ Matrice de colision
             Mat<int> density;
+            
+            //~ Matrice des distance
+            Mat<int> distances;
+
+			int _distanceMax;
 			
         public:
             Labyrinthe (char*);
@@ -104,9 +107,7 @@
             void sortMovers(Mat<char> A);
 
             void makeDensity(Mat<char> A, Mat<int>& B);
-            //#s
             void makePCC(Mat<int> A, Mat<int>& B);
-            //#e
             void printInFileMat(const Mat<int>& A, const char* fname);
 
 	};
