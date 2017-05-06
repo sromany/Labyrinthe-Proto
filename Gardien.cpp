@@ -37,7 +37,39 @@ Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y,
 
 // Le gardien pense ici
 void Gardien::update(void) {
- /*
+	
+    if (this == _l->_guards[1]) {
+       
+        _potentiel_max = 0;
+        
+        _distance_max = 0;
+        
+        for (int i = 1; _l->_nguards - 1; i++) {
+            
+            Gardien* gardien = (Gardien*) ((Labyrinthe*) _l)->_guards[i];
+            
+            int distance = ((Labyrinthe*) _l)->getDistance(gardien->_x / Environnement::scale, gardien->_y / Environnement::scale);
+                    
+            _distance_max = max(_distance_max, distance * gardien->_pv);
+            
+        }
+        
+    }
+
+    int distance = ((Labyrinthe*) _l)->getDistance(_x / Environnement::scale, _y / Environnement::scale);
+    
+    if (distance * _pv) {
+        _potentiel = distance / _distance_max;
+        _potentiel_max += _potentiel;
+    } 
+	
+    if (_potentiel_max < _potentiel + 1) {
+        _defense = true;
+    } else {
+        _defense = false;
+    }
+ 
+/*
 
     if (this == this->_l->_guards[1]) {
         this->_l->_totalPotenciel = 0;
@@ -85,14 +117,6 @@ void Gardien::update(void) {
 	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 }
 
-
-// update pontetiel
-void Gardien::compute_potentiel() {
-    _potentiel = ((Labyrinthe*)_l)->distanceTreasor(_x, _y) / ((Labyrinthe*)_l)->_distanceMax;
-}
-
-
-// et ne bouge pas!
 //#s
 bool Gardien::move (double dx, double dy) { 
 	//~ vector<pair<int, pair<int, int>>> octants;

@@ -61,7 +61,10 @@
         private:
             //~ Matrice du labyrinthe en ascii
             Mat<char> ascii;
-	
+
+            //~ Matrice des distances
+            Mat<int> distance;
+
             //~ Dimension du labyrinthe
             int lab_width;
             int lab_height;           
@@ -88,10 +91,10 @@
             char data (int i, int j)
             {
                 return density[i][j];
-            }
-            
-			bool isAccessible(int x, int y);
-			int distanceTreasor(int x, int y);
+            }	// retourne la case (i, j).
+			
+            bool isAccessible(int x, int y);
+            int getDistance(int x, int y);
 			
         private:
             void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient
