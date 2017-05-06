@@ -65,12 +65,8 @@ bool Chasseur::process_fireball (float dx, float dy)
 	for(int i = 1; i <_l->_nguards; i++){
 		if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
 			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y){
-			if(((Gardien *) ((Labyrinthe *)_l)->_guards[i])->_pv > 0){
 				((Gardien *) ((Labyrinthe *)_l)->_guards[i])->_pv--;
 				_l->_guards[i]->tomber();
-			}else{
-				_l->_guards[i]->rester_au_sol();
-			}
 		}
 	}
 
@@ -78,6 +74,8 @@ bool Chasseur::process_fireball (float dx, float dy)
 	// calculer la distance maximum en ligne droite.
 	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
+	// On peut éventuellement utiliser les coordonnées de la colisions pour jouer
+	// le son en fonction des panoramiques droite gauche
 	_wall_hit -> play (1. - dist2/dmax2);
 	//~ message ("Booom...");
 	return false;
