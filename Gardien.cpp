@@ -46,7 +46,7 @@ void Gardien::update(void) {
             
             Gardien* gardien = (Gardien*) ((Labyrinthe*) _l)->_guards[i];
             
-            int distance = ((Labyrinthe*) _l)->distances[gardien->_x / Environnement::scale][gardien->_y / Environnement::scale];
+            int distance = ((Labyrinthe*) _l)->getDistance(gardien->_x / Environnement::scale, gardien->_y / Environnement::scale);
                     
             _distance_max = max(_distance_max, distance * gardien->_pv);
             
@@ -54,12 +54,18 @@ void Gardien::update(void) {
         
     }
 
-    if (((Labyrinthe*) _l)->distances[_x / Environnement::scale][_y / Environnement::scale] * _pv) {
-        _potentiel = ((Labyrinthe *) _l)->distances[_x / Environnement::scale][_y / Environnement::scale] / _distance_max;
+    int distance = ((Labyrinthe*) _l)->getDistance(_x / Environnement::scale, _y / Environnement::scale);
+    
+    if (distance * _pv) {
+        _potentiel = distance / _distance_max;
         _potentiel_max += _potentiel;
     } 
 	
-//if (_potentiel_max < _potentiel + 1)  
+    if (_potentiel_max < _potentiel + 1) {
+        _defense = true;
+    } else {
+        _defense = false;
+    }
  
 /*
 

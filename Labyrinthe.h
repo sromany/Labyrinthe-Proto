@@ -62,8 +62,8 @@
             //~ Matrice du labyrinthe en ascii
             Mat<char> ascii;
 
-            //~ Matrice des distance
-            Mat<int> distances;
+            //~ Matrice des distances
+            Mat<int> distance;
 
             //~ Dimension du labyrinthe
             int lab_width;
@@ -89,7 +89,9 @@
             {
                 return density[i][j];
             }	// retourne la case (i, j).
-			bool isAccessible(int x, int y);
+			
+            bool isAccessible(int x, int y);
+            int getDistance(int x, int y);
 			
         private:
             void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient
@@ -100,8 +102,6 @@
             void sortWallsAndPicts(Mat<char> A);
             void sortElements(Mat<char> A);
             void sortMovers(Mat<char> A);
-
-            int distance(Mat<char>& A, int dNew, int i, int j, coord orig);
 
             void makeDensity(Mat<char> A, Mat<int>& B);
             //#s

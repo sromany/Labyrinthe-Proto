@@ -54,7 +54,7 @@ Labyrinthe::Labyrinthe (char* filename){
 	sortMovers(ascii);
 
 	//#s
-	makePCC(density, distances);
+	makePCC(density, distance);
 	//#e
 }
 
@@ -392,11 +392,11 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 	for (int i = 0; i < lab_height; i++) {
 		for (int j = 0; j < lab_width; j++) {			
 			visited[i][j] = !isAccessible(i,j);      
-	            	distances[i][j] = INT_MAX;
+	            	distance[i][j] = INT_MAX;
 		}
 	}
 	//
-	distances[i_x][j_y] = 0;
+	distance[i_x][j_y] = 0;
 	//
 	vector<coord>  unexplored;
 	unexplored.push_back(p);
@@ -425,8 +425,8 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 		for (int k = -1; k <= 1; k++) {
 			//
 			for (int l = -1; l <= 1; l++) {
-				if (isAccessible(i_x + k, j_y + l) && (distances[i_x + k][j_y + l] > (distances[i_x][j_y] + 1))) {
-					distances[i_x + k][j_y + l] = distances[i_x][j_y] + 1;
+				if (isAccessible(i_x + k, j_y + l) && (distance[i_x + k][j_y + l] > (distance[i_x][j_y] + 1))) {
+					distance[i_x + k][j_y + l] = distance[i_x][j_y] + 1;
 				}
 			}		
 		}
@@ -438,5 +438,11 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 //
 bool Labyrinthe::isAccessible(int x, int y) {
 	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != MUR) && (density[x][y] != TRESOR) && (density[x][y] != BOX);
+}
+int Labyrinthe::getDistance(int x, int y) {
+	if (isAccessible(x, y)){
+            return distance[x][y];
+        }
+        return INT_MAX;
 }
 //#e

@@ -37,6 +37,7 @@ class Gardien : public Mover {
                 static int _distance_max;
                 static float _potentiel_max;
                 float _potentiel;
+                bool _defense;
 		//#e
 	public:
 		Gardien (Labyrinthe* l, int x, int y, const char* modele);
