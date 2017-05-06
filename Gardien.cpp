@@ -175,7 +175,7 @@ bool Gardien::move (double dx, double dy) {
 	}
 		
 
-	if (((Labyrinthe *) _l)->isAccessible(next_x, next_y)) {
+	if (((Labyrinthe *) _l)->isAccessible(next_x, next_y)){
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
 		_x += dx * cos(_angle);
         _y += dy * sin(_angle);
