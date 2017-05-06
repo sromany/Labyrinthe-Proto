@@ -20,12 +20,31 @@
 #define OCTANT_7 make_pair(8, make_pair(  1,  1))
 
 using namespace std;
+int Gardien::_distance_max = 0;
+float Gardien::_potentiel_max = 0;
+
+//~ void inline check_out_of_bounds(void)
+//~ {
+	//~ if(next_x >= _l->width()){
+			//~ printf("1 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+		//~ }
+		//~ if(next_x < 0){
+			//~ printf("2 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+		//~ }
+		//~ if(next_y < 0){
+			//~ printf("3 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+		//~ }
+		//~ if(next_y >= _l->height()){
+			//~ printf("4 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
+		//~ }
+//~ }
+        
 //#e
 //Constructor
 Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y, l, modele)
 {
 	_pv = 3;
-	_mode = ATTAQUE;
+	_behavior = ATTAQUE;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
 	if (_wall_hit == 0)
@@ -38,41 +57,45 @@ Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y,
 // Le gardien pense ici
 void Gardien::update(void) {
 	
+
+
     if (this == _l->_guards[1]) {
-       
-        _potentiel_max = 0;
-        
+        _potentiel_max = 0;        
         _distance_max = 0;
         
-        for (int i = 1; _l->_nguards - 1; i++) {
+        for (int i = 1; i < _l->_nguards; i++) {
             
-            Gardien* gardien = (Gardien*) ((Labyrinthe*) _l)->_guards[i];
-            
-            int distance = ((Labyrinthe*) _l)->getDistance(gardien->_x / Environnement::scale, gardien->_y / Environnement::scale);
-                    
-            _distance_max = max(_distance_max, distance * gardien->_pv);
-            
+            Gardien* gardien = ((Gardien*) ((Labyrinthe*) _l)->_guards[i]);
+            coord posGardien;
+            posGardien.i = (int)(gardien->_x / Environnement::scale);
+            posGardien.j = (int)(gardien->_y / Environnement::scale);		
+            	
+            int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);                        
+            _distance_max = max(_distance_max, distance * gardien->_pv);            
         }
         
     }
-
-    int distance = ((Labyrinthe*) _l)->getDistance(_x / Environnement::scale, _y / Environnement::scale);
     
+	coord posGardien;
+	posGardien.i = (int)(_x / Environnement::scale);
+    posGardien.j = (int)(_y / Environnement::scale);
+    int distance = ((Labyrinthe*) _l)->getDistance(posGardien.i, posGardien.j);
+    if(this == _l->_guards[1]) printf("%f , %d\n", _potentiel_max, _distance_max);
     if (distance * _pv) {
-        _potentiel = distance / _distance_max;
+        _potentiel = distance / _l->width();//_distance_max;
         _potentiel_max += _potentiel;
     } 
 	
     if (_potentiel_max < _potentiel + 1) {
-        _defense = true;
+        _behavior = DEFENSE;
     } else {
-        _defense = false;
+        _behavior = ATTAQUE;
     }
  
 /*
 
     if (this == this->_l->_guards[1]) {
-        this->_l->_totalPotenciel = 0;
+        this->_l->_totalPotentiel = 0;
         this->_l->calcDistance();
     }
 
@@ -93,10 +116,10 @@ void Gardien::update(void) {
 	
 	
 	if(this->_pv > 0){
-		if(_mode = ATTAQUE){
+		if(_behavior == ATTAQUE){
 			if(fm.trigger == false)
 			{
-				fire(0);		
+				fire(0);
 				fm.trigger = true;
 				fm.hit = false;
 			}else{
@@ -133,8 +156,7 @@ bool Gardien::move (double dx, double dy) {
 	
 	int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
 	int next_y = (int)((_y + dy * sin(_angle)) / Environnement::scale);
-	int next_step = _l -> data (next_x,	next_y);
-	
+	//~ int next_step = _l -> data (next_x,	next_y);
 	if(next_x >= _l->width()){
 		printf("1 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
 	}
@@ -161,7 +183,6 @@ bool Gardien::move (double dx, double dy) {
     setAngle();
     
     // Set Angle Defense
-
 	return false;
 }
 //#e
@@ -169,8 +190,8 @@ bool Gardien::move (double dx, double dy) {
 // ne sait pas tirer sur un ennemi.
 void Gardien::fire (int angle_vertical) {
     // _guard_fire -> play ();
-	_fb -> init (_x, _y, 10.,          /* position initiale de la boule xyz */ 
-				 angle_vertical, _angle); /* angle de visée vertical - horizontal */ 
+	_fb -> init (_x, _y, 10.,                /* position initiale de la boule xyz */ 
+				 angle_vertical, _angle);    /* angle de visée vertical - horizontal */ 
 	fd.start = clock();
 }
 
@@ -178,19 +199,19 @@ void Gardien::fire (int angle_vertical) {
 // quand a faire bouger la boule de feu...
 bool Gardien::process_fireball (float dx, float dy)
 {
-	printf("A\n");
-	// calculer la distance entre le chasseur et le lieu de l'explosion.
-	float	x = (_x - _fb -> get_x ()) / Environnement::scale;
-	printf("B\n");
-	float	y = (_y - _fb -> get_y ()) / Environnement::scale;
-	printf("C\n");
-	float	dist2 = x*x + y*y;
-	printf("D\n");
+	//~ printf("A\n");
+	// calculer la distance du sons entre le chasseur et le lieu de l'explosion.
+	//~ float	x = (_x - _fb -> get_x ()) / Environnement::scale;
+	//~ printf("B\n");
+	//~ float	y = (_y - _fb -> get_y ()) / Environnement::scale;
+	//~ printf("C\n");
+	//~ float	dist2 = x*x + y*y;
+	//~ printf("D\n");
 	
 	int next_x = (int)((_fb -> get_x () + dx) / Environnement::scale);
-	printf("E\n");
+	//~ printf("E\n");
 	int next_y = (int)((_fb -> get_y () + dy) / Environnement::scale);
-	printf("F\n");
+	//~ printf("F\n");
 	
 	if(next_x < 0){
 		next_x = 0;
@@ -202,7 +223,7 @@ bool Gardien::process_fireball (float dx, float dy)
 	}else if(next_y >= _l->height()){
 		next_y = _l->height()-1;
 	}
-	printf("G\n");
+	//~ printf("G\n");
 	printf("%d , %d \n",(int)((_fb -> get_x () + dx) / Environnement::scale), 
 						(int)((_fb -> get_y () + dy) / Environnement::scale));
 	
@@ -212,8 +233,8 @@ bool Gardien::process_fireball (float dx, float dy)
 	// on bouge que dans le vide !
 	if (next_step == EMPTY)
 	{
-		printf("H\n");
-		printf("I\n");
+		//~ printf("H\n");
+		//~ printf("I\n");
 		// il y a la place.
 		return true;
 	}
@@ -234,14 +255,14 @@ bool Gardien::process_fireball (float dx, float dy)
 	//~ }
 
 	fd.stop = clock();
-	printf("J\n");
+	//~ printf("J\n");
 	// calculer la distance maximum en ligne droite.
-	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
-	printf("K\n");
+	//~ float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
+	//~ printf("K\n");
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
 	//~ _wall_hit -> play (1. - dist2/dmax2);
 	fm.hit = true;
-	printf("L\n");
+	//~ printf("L\n");
 	return false;
 }
 
@@ -329,3 +350,4 @@ void Gardien::setAngle() {
 
 }
 //#e
+

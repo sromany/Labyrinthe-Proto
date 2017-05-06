@@ -33,16 +33,11 @@ Labyrinthe::Labyrinthe (char* filename){
 	// On stock les affiches.
 	//string texfiles[_npict];
 	_picts = new Wall[_npicts];
-    char tmp [128];
-	sprintf (tmp, "%s/%s", texture_dir, "voiture.jpg");
-	_picts [0]._ntex = wall_texture (tmp);
-
 	sortWallsAndPicts(ascii);
+	
 	// On stock les boxes.
 	_boxes = new Box[_nboxes];
 
-    // DONE
-	// faire une fonction appliTex
     // On tous les elements
 	sortElements(ascii);
 
@@ -161,10 +156,6 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 		}
 	}
 	printInFileMat(B, "density");
-}
-
-int Labyrinthe::distanceTreasor(int x, int y){
-	return x - _treasor._x;
 }
 
 int Labyrinthe::countWalls(Mat<char> A){
