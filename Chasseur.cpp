@@ -46,11 +46,9 @@ bool Chasseur::process_fireball (float dx, float dy)
 {
 	int next_x = (int)((_fb -> get_x () + dx) / Environnement::scale);
 	int next_y = (int)((_fb -> get_y () + dy) / Environnement::scale);
-
-	char value_of_next = _l->data (next_x, next_y);
 	
 	// on bouge que dans le vide!
-	if (value_of_next == EMPTY)
+	if (((Labyrinthe *)_l)->isAccessible(next_x,next_y) && ((Labyrinthe *)_l)->density[next_x][next_y] == EMPTY)
 	{
 		//~ message ("Woooshh ..... %d", (int) dist2);
 		// il y a la place.
