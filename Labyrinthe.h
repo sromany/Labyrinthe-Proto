@@ -121,7 +121,7 @@
 
             void makeDensity(Mat<char> A, Mat<int>& B);
             void makePCC(Mat<int> A, Mat<int>& B);
-
-
+            int updateDistance(int x, int y);
+		
 	};
 #endif
