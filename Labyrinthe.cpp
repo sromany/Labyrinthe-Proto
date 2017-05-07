@@ -27,6 +27,9 @@ Labyrinthe::Labyrinthe (char* filename){
 	cout << "Nombre d'affiches: " << _npicts << endl;
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
+        //#s
+        cout << "Nombre de teleporter: " << _nteleporter << endl;
+        //#e
 	printMat(ascii, lab_width, lab_height);
 	
 	printf("C\n");
@@ -38,16 +41,20 @@ Labyrinthe::Labyrinthe (char* filename){
 	// On stock les affiches.
 	//string texfiles[_npict];
 	_picts = new Wall[_npicts];	
-	_teleporters._t = new Wall* [_nteleporter];
-
+                
 	printf("D\n");
 	sortWallsAndPicts(ascii);
 	// On stock les boxes.
 	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
+        
+        //#s
+        //
+	_teleporters = new Box [_nteleporter];
+        //#e
 
-    // On tous les elements
-    printf("E\n");
+        // On tous les elements
+        printf("E\n");
 	sortElements(ascii);
 
 	// On stock les gardiens et le chasseur
@@ -170,7 +177,7 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 				B[i][j] = GARDIEN;
 			}else if(A[i][j] == 'T'){
 				B[i][j] = TRESOR;
-			}else if(A[i][j] == '@'){
+			}else if(A[i][j] == '#'){
 				B[i][j] = PORTAL;
 			}else if(A[i][j] == 'x'){
 				B[i][j] = BOX;
@@ -236,20 +243,24 @@ void Labyrinthe::countAllData(Mat<char> A){
 
 	for(int i = 0; i < lab_height; i++){
 		for(int j = 0; j < lab_width; j++){
-			if(A[i][j] == 'x'){
+                        //#s
+                        if(A[i][j] == 'x' || A[i][j] == '#'){
 				k++;
 			}
+                        //#e
 			if(A[i][j] == 'G' || A[i][j] == 'C'){
 				g++;
 			}
 			if(A[i][j] >= 'a' && A[i][j] <= 'z'){
-                if(A[i][j] != 'x'){
-                    m++;
-                }
+                            if(A[i][j] != 'x'){
+                                m++;
+                            }
 			}
-			if(A[i][j] == '@'){
+                        //#s
+			if(A[i][j] == '#'){
 				t++;
 			}
+                        //#e
 		}
 	}
 	_nboxes = k;
@@ -273,7 +284,7 @@ void Labyrinthe::findTex(char tmp[], const char c){
 }
 
 void Labyrinthe::sortWallsAndPicts(Mat<char> A){
-	int k = 0, g = 0, t = 0;
+	int k = 0, g = 0; /** * //#s , t = 0; * //#e */
 	int h = 0, v = 0;
 	bool close = true;
 	cout << "Taille envoyer a sortWall " << lab_width << " x " << lab_height << endl;
@@ -314,8 +325,12 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 					if(A[i][j] == '@'){
 						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
 						_picts[g]._ntex = wall_texture (tmp);
-						_teleporters._t[t] = &_picts[g];						
+                                                /**
+                                                 * //#s
+                                                _teleporters._t[t] = &_picts[g];						
 						t++;
+                                                 * //#e
+                                                 */
 					}else{
 						findTex(tmp, A[i][j]);
 						_picts[g]._ntex = wall_texture (tmp);              
@@ -357,12 +372,16 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
                     _picts[g]._x2 = i+1;
                     _picts[g]._y2 = j;
                      
-                    char tmp[128];                 
-					if(A[i][j] == '@'){
+                    char tmp[128];      
+                    	if(A[i][j] == '@'){
 						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
 						_picts[g]._ntex = wall_texture (tmp);
-						_teleporters._t[t] = &_picts[g];						
+						/**
+                                                 * //#s
+                                                _teleporters._t[t] = &_picts[g];						
 						t++;
+                                                 * //#e
+                                                 */
 					}else{						
 						findTex(tmp, A[i][j]);
 						_picts[g]._ntex = wall_texture (tmp);                    
@@ -379,10 +398,10 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 
 void Labyrinthe::sortElements(Mat<char> A){
 
-	int k = 0;
+	int k = 0, t =0;
 	for(int i = 0; i < lab_height; i++){
 		for(int j = 0; j < lab_width; j++){
-			if(A[i][j] == 'x'){
+			if((A[i][j] == 'x') || (A[i][j] == '#')) {
 				_boxes[k]._x = i;
 				_boxes[k]._y = j;
 				k++;
@@ -390,7 +409,14 @@ void Labyrinthe::sortElements(Mat<char> A){
 			if(A[i][j] == 'T'){
 				_treasor._x = i;
 				_treasor._y = j;
+			} 
+                        //#s
+                        if(A[i][j] == '#') {
+				_teleporters[t]._x = i;
+				_teleporters[t]._y = j;
+                                t++;
 			}
+                        //#e
 		}
 	}
 }

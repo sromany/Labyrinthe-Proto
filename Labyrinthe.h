@@ -27,10 +27,14 @@
 		int x, y;
 	}coord;
 	
+        /**
+         * //#s
 	typedef struct Teleporter{
 		Wall **_t;
 		coord * _exit;
 	}Teleporter;
+         * //#e
+         */
 
 	/**
 	 ** Template for std::vector<std::vector<T>> as Mat<T>
