@@ -502,9 +502,10 @@ bool Labyrinthe::removeBox(int x, int y) {
 	if ((x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] == BOX)){
 
 		for (int index = 0; index < _nboxes; index++){
-
+			
 			if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
 				density[x][y] = EMPTY;
+                                updateDistance(x, y);
 				memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
 				_nboxes--; 
 				reconfigure();
@@ -514,4 +515,13 @@ bool Labyrinthe::removeBox(int x, int y) {
 	}
 	return false;
 }
-//#e
+
+//
+int Labyrinthe::updateDistance(int x, int y) {
+    for (int i = -1; i <= 1; i++) {
+	for (int j = -1; j <= 1; j++) {
+            distance[x][y] = min(distance[x][y], getDistance(x + i, y + j));
+	}
+    }
+    return distance[x][y]++;    
+}//#e
