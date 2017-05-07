@@ -237,8 +237,11 @@ bool Gardien::process_fireball (float dx, float dy)
 	{
 		return true;
 	}
-
 	
+        //#s
+        ((Labyrinthe*) _l)->removeBox(next_x, next_y);
+        //#e
+        
 	//~ // Sinon collision...
 	//~ // Si la prochaine case contient du chasseur	
 	if((int)(chasseur->_x / Environnement::scale) == next_x 

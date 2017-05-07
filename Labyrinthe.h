@@ -93,6 +93,7 @@
 			
             bool isAccessible(int x, int y);
             int getDistance(int x, int y);
+            bool removeBox(int x, int y);
 			
         private:
             void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient

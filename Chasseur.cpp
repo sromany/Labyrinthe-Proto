@@ -61,7 +61,10 @@ bool Chasseur::process_fireball (float dx, float dy)
 		return true;
 	}
 	
-
+        //#s
+        ((Labyrinthe*) _l)->removeBox(next_x, next_y);
+        //#e
+        
 	for(int i = 1; i <_l->_nguards; i++){
 		if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x 
 			&& (int)(_l->_guards[i]->_y / Environnement::scale) == next_y){
@@ -70,7 +73,7 @@ bool Chasseur::process_fireball (float dx, float dy)
 				_l->_guards[i]->tomber();
 		}
 	}
-
+                        
 	// collision...
 	// calculer la distance maximum en ligne droite.
 	float	dmax2 = (_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ());
