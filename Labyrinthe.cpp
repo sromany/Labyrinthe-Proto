@@ -19,38 +19,49 @@ Environnement* Environnement::init (char* filename)
 }
 
 Labyrinthe::Labyrinthe (char* filename){
+	printf("A\n");
 	readFile(string(filename));
+	
+	printf("B\n");
 	cout << "Nombre de murs: " << _nwall << endl;
 	cout << "Nombre d'affiches: " << _npicts << endl;
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
 	printMat(ascii, lab_width, lab_height);
-	makeDensity(ascii, density);
 	
+	printf("C\n");
+	makeDensity(ascii, density);
+
 	// On stock les murs
 	_walls = new Wall[_nwall];
 
 	// On stock les affiches.
 	//string texfiles[_npict];
-	_picts = new Wall[_npicts];
+	_picts = new Wall[_npicts];	
+	_teleporters._t = new Wall* [_nteleporter];
+
+	printf("D\n");
 	sortWallsAndPicts(ascii);
-	
 	// On stock les boxes.
+	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
 
     // On tous les elements
+    printf("E\n");
 	sortElements(ascii);
 
 	// On stock les gardiens et le chasseur
 	_guards = new Mover* [_nguards];
-	
+
 	// On stock chasseur et les gardiens.
+	printf("F\n");
 	sortMovers(ascii);
 
 	//#s
+	printf("G\n");
 	makePCC(density, distance);
 	//#e
-	
+
 	printf("%d  x %d\n", width(), height());
 }
 
@@ -62,27 +73,33 @@ void Labyrinthe::readFile(string fname){
 	int width =  0;
 	int height = 0;
 	char c = ' ';
+	
 	regex comment("^#");
 	regex rtex("[[:alpha:]]+[[:digit:]]*[[:alpha:]]*\\.jpg");
-	regex letter_Not_x("^[a-wy-z]");
+	regex letter_Not_x("^(\\s*)([a-wy-z]|@)");
+	regex spaceOrWall("^(\\s*)((\\+)+|(\\|))");
 	smatch tex_fname;
 	smatch tex_letter;
-
+	printf("START\n");
 	if(in){
 		while(getline(in,line)){
 			if (regex_search(line, comment)) {
 				// Ici on parse les lignes commençant par un commentaire en les ignorants
+				printf("COMMENT\n");
 			}
 			else if(regex_search(line, tex_letter, letter_Not_x) && regex_search(line, tex_fname, rtex)){
+				printf("AFFICHE\n");
 				// C'est ici qu'on enregistre les textures
 				cout << "Affiche: ["<< tex_letter[0].str()[0] << "]" << "\nFichier: ["<< tex_fname[0].str() << "]" << endl;
 				texTab.push_back(tex_letter[0].str().c_str()[0]);
 				texFile.push_back(tex_fname[0].str());
 			}
-			else if(regex_search(line, regex("^(\\s*)((\\+)+|(\\|))")) || regex_search(line, regex("^[a-wy-z]"))){
-                // Ici on commence à compter les murs du labyrinthe
+			else if(regex_search(line, spaceOrWall) || regex_search(line, letter_Not_x)){
+				printf("COUNT SIZE\n");
+                // Ici on commence à compter la taille du labyrinthe
 				width = std::max(width, int(line.length()));
 				height++;
+				// Et on retient la position ou le labyrinthe débute dans le fichier
 				if(first){
 					lab_start = int(in.tellg()) - int(line.length()) - 1;
 					cout << "offset: " << lab_start << endl;
@@ -90,6 +107,8 @@ void Labyrinthe::readFile(string fname){
 				}
 			}
 		}
+		
+		printf("END %d , %d\n",width, height);
 		cout << "Taille du labyrinthe calculer dans le fichier " <<  width << " x " << height << endl;
 		lab_width = width;
 		lab_height = height;
@@ -99,11 +118,12 @@ void Labyrinthe::readFile(string fname){
 		in.clear();
 		in.seekg(lab_start);
 		int i = 0;
-
+		printf("START AGAIN\n");
 		while(getline(in,line)){
-
+			printf("EACH LINE\n");
 			for(int j = 0; j < int(line.length()); j++){
 				ascii[i][j] = line[j];
+				printf("%d , %d \n", i, j);
 			}
 			i++;
 		}
@@ -111,7 +131,9 @@ void Labyrinthe::readFile(string fname){
 	}else{
 		cout << "ERREUR: Impossible d'ouvrir le fichier en lecture." << endl;
 	}
+	printf("END AGAIN\n");
 	countAllData(ascii);
+	printf("COUNT DATA\n");
 }
 
 void Labyrinthe::printInFileMat(const Mat<int>& A, const char* fname){
@@ -148,6 +170,8 @@ void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
 				B[i][j] = GARDIEN;
 			}else if(A[i][j] == 'T'){
 				B[i][j] = TRESOR;
+			}else if(A[i][j] == '@'){
+				B[i][j] = PORTAL;
 			}else if(A[i][j] == 'x'){
 				B[i][j] = BOX;
 			}else{
@@ -162,6 +186,8 @@ int Labyrinthe::countWalls(Mat<char> A){
 
 	int k = 0;
 	bool close = true;
+	
+	// Murs Horizontaux
 	for(int i = 0; i < lab_height; i++){
 		for(int j = 0; j < lab_width; j++){
 			if(A[i][j] == '+'){
@@ -171,7 +197,8 @@ int Labyrinthe::countWalls(Mat<char> A){
 				}else if(close){
 					k++;
 					if(j < lab_width - 1){
-						if(A[i][j + 1] == '-' || A[i][j + 1] == '+'){
+						if(A[i][j + 1] == '-' || A[i][j + 1] == '+' || A[i][j + 1] == '@' 
+						|| ((A[i][j + 1] >= 'a' && A[i][j + 1] <= 'z') && A[i][j + 1] != 'x')){
 							close = !close;
 						}
 					}
@@ -179,16 +206,19 @@ int Labyrinthe::countWalls(Mat<char> A){
 			}
 		}
 	}
+
+	// Murs Verticaux
  	for(int j = 0; j < lab_width; j++){
 		for(int i = 0; i < lab_height; i++){
 			if(A[i][j] == '+'){
 				close = !close;
 				if(!close){
-				}
-				if(close){
+					
+				}else if(close){
 					k++;
 					if(i < lab_height - 1){
-						if(A[i+1][j] == '|' || A[i+1][j] == '+'){
+						if(A[i + 1][j] == '|' || A[i + 1][j] == '+' || A[i + 1][j] == '@' 
+						|| ((A[i + 1][j] >= 'a' && A[i + 1][j] <= 'z') && A[i + 1][j]!= 'x')){
 							close = !close;
 						}
 					}
@@ -201,6 +231,7 @@ int Labyrinthe::countWalls(Mat<char> A){
 
 void Labyrinthe::countAllData(Mat<char> A){
 	int k = 0, g = 0, m = 0;
+	int t = 0;
 	_nwall = countWalls(A);
 
 	for(int i = 0; i < lab_height; i++){
@@ -216,11 +247,15 @@ void Labyrinthe::countAllData(Mat<char> A){
                     m++;
                 }
 			}
+			if(A[i][j] == '@'){
+				t++;
+			}
 		}
 	}
 	_nboxes = k;
 	_nguards = g;
 	_npicts = m;
+	_nteleporter = t;
 }
 
 void Labyrinthe::findTex(char tmp[], const char c){
@@ -238,11 +273,13 @@ void Labyrinthe::findTex(char tmp[], const char c){
 }
 
 void Labyrinthe::sortWallsAndPicts(Mat<char> A){
-	int k = 0, g = 0;
+	int k = 0, g = 0, t = 0;
 	int h = 0, v = 0;
 	bool close = true;
 	cout << "Taille envoyer a sortWall " << lab_width << " x " << lab_height << endl;
 
+	printf("Dprime1\n");
+	// Murs Horizontaux
 	for(int i = 0; i < lab_height; i++){
 		for(int j = 0; j < lab_width; j++){
 			if(A[i][j] == '+'){
@@ -267,20 +304,29 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 				}
 			}
 			if(!close){
-                if((A[i][j] >= 'a' && A[i][j] <= 'z') && A[i][j]!= 'x'){
+                if(((A[i][j] >= 'a' && A[i][j] <= 'z') && A[i][j]!= 'x')|| A[i][j] == '@'){
                     _picts[g]._x1 = i;
                     _picts[g]._y1 = j-1;
                     _picts[g]._x2 = i;
                     _picts[g]._y2 = j+1;
 
-                    char tmp[128];
-                    findTex(tmp, A[i][j]);
-                    _picts[g]._ntex = wall_texture (tmp);
-                    g++;
-                }
+					char tmp[128];
+					if(A[i][j] == '@'){
+						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
+						_picts[g]._ntex = wall_texture (tmp);
+						_teleporters._t[t] = &_picts[g];						
+						t++;
+					}else{
+						findTex(tmp, A[i][j]);
+						_picts[g]._ntex = wall_texture (tmp);              
+					}
+					g++;
+				}
 			}
 		}
 	}
+	printf("Dprime2\n");
+	// Murs Verticaux
  	for(int j = 0; j < lab_width; j++){
 		for(int i = 0; i < lab_height; i++){
 			if(A[i][j] == '+'){
@@ -310,15 +356,23 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
                     _picts[g]._y1 = j;
                     _picts[g]._x2 = i+1;
                     _picts[g]._y2 = j;
-
-                    char tmp[128];
-                    findTex(tmp, A[i][j]);
-                    _picts[g]._ntex = wall_texture (tmp);
-                    g++;
-                }
+                     
+                    char tmp[128];                 
+					if(A[i][j] == '@'){
+						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
+						_picts[g]._ntex = wall_texture (tmp);
+						_teleporters._t[t] = &_picts[g];						
+						t++;
+					}else{						
+						findTex(tmp, A[i][j]);
+						_picts[g]._ntex = wall_texture (tmp);                    
+					}
+					g++;
+				}
             }
 		}
 	}
+	printf("Dprime3\n");
 	cout <<"Nb de mur H:" << h << endl;
 	cout <<"Nb de mur V:" << v << endl;
 }
@@ -384,8 +438,8 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
     	createMat(visited, lab_width, lab_height);
 	//
 	for (int i = 0; i < lab_height; i++) {
-		for (int j = 0; j < lab_width; j++) {			
-			visited[i][j] = !isAccessible(i,j);      
+		for (int j = 0; j < lab_width; j++) {
+			visited[i][j] = !isAccessible(i,j);
 	            	distance[i][j] = INT_MAX;
 		}
 	}
@@ -409,9 +463,9 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 				if (isAccessible(i_x + k, j_y + l) && !visited[i_x + k][j_y + l]) {
 					p.i = i_x + k;
 					p.j = j_y + l;
-					unexplored.push_back(p);				
+					unexplored.push_back(p);
 				}
-			}		
+			}
 		}
 		//
         	visited[i_x][j_y] = true;
@@ -431,7 +485,7 @@ void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
 
 //
 bool Labyrinthe::isAccessible(int x, int y) {
-	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != MUR) && (density[x][y] != TRESOR) && (density[x][y] != BOX);
+	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != MUR) && (density[x][y] != TRESOR) && (density[x][y] != BOX ) && (density[x][y] != CHASSEUR);
 }
 
 //
@@ -444,26 +498,20 @@ int Labyrinthe::getDistance(int x, int y) {
 
 //
 bool Labyrinthe::removeBox(int x, int y) {
+	// Vérification : si c'est bien une caisse et qu'on se trouve dans le Lab..
 	if ((x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] == BOX)){
-                                    
-            for (int index = 0; index < _nboxes; index++){
-               
-                if((_boxes[index]._x == x) && (_boxes[index]._y == y)) {
-            
-                    density[x][y] = EMPTY;
-                    
-                    memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
-                    
-                    _nboxes--; 
-                    
-                    reconfigure();
-                    
-                    return true;
-                   
-               }
-            }
-                                   
-        }
-        return false;
+
+		for (int index = 0; index < _nboxes; index++){
+			
+			if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
+				density[x][y] = EMPTY;
+				memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
+				_nboxes--; 
+				reconfigure();
+				return true;
+		   }
+		}
+	}
+	return false;
 }
 //#e

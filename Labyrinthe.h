@@ -15,8 +15,10 @@
 	#define MUR 1
 	#define CHASSEUR 2
 	#define GARDIEN 3
-	#define BOX 5	
 	#define TRESOR 7
+	#define PORTAL 4
+	#define BOX 5	
+
 	
 	using namespace std;
 
@@ -24,6 +26,11 @@
 		int i, j;
 		int x, y;
 	}coord;
+	
+	typedef struct Teleporter{
+		Wall **_t;
+		coord * _exit;
+	}Teleporter;
 
 	/**
 	 ** Template for std::vector<std::vector<T>> as Mat<T>
@@ -68,7 +75,7 @@
 
             //~ Dimension du labyrinthe
             int lab_width;
-            int lab_height;           
+            int lab_height;                   
 
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
@@ -81,6 +88,12 @@
             
             //~ Matrice des distance
             Mat<int> distances;
+            
+            //~ Teleporteur
+            Teleporter _teleporters;
+            
+            //~ Nombre de téléporteurs
+            int _nteleporter;
 			
         public:
             Labyrinthe (char*);
@@ -94,6 +107,7 @@
             bool isAccessible(int x, int y);
             int getDistance(int x, int y);
             bool removeBox(int x, int y);
+            void printInFileMat(const Mat<int>& A, const char* fname);
 			
         private:
             void readFile(string fname);		      // Lit un fichier .txt et créer le labyrinthe qu'il contient
@@ -107,7 +121,7 @@
 
             void makeDensity(Mat<char> A, Mat<int>& B);
             void makePCC(Mat<int> A, Mat<int>& B);
-            void printInFileMat(const Mat<int>& A, const char* fname);
+
 
 	};
 #endif
