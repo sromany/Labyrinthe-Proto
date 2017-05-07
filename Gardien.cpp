@@ -185,7 +185,7 @@ bool Gardien::process_fireball (float dx, float dy)
 
 	
 	// on bouge que dans le vide !
-	if (((Labyrinthe *)_l)->isAccessible(next_x,next_y))
+	if (((Labyrinthe *)_l)->isAccessible(next_x,next_y) && ((Labyrinthe *)_l)->density[next_x][next_y] == EMPTY)
 	{
 		return true;
 	}
