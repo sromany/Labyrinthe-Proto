@@ -101,7 +101,7 @@ void Gardien::update(void) {
 			}			
 			//#s		
 		}
-		move(0.5, 0.5);
+		move(0., 0.3);
 	}else{
 		rester_au_sol();
 	}
@@ -114,48 +114,33 @@ void Gardien::update(void) {
 
 //#s
 bool Gardien::move (double dx, double dy) { 
-	//~ vector<pair<int, pair<int, int>>> octants;
-	//~ octants.push_back(OCTANT_0);
-	//~ octants.push_back(OCTANT_1);
-	//~ octants.push_back(OCTANT_2);
-	//~ octants.push_back(OCTANT_3);
-	//~ octants.push_back(OCTANT_4);
-	//~ octants.push_back(OCTANT_5);
-	//~ octants.push_back(OCTANT_6);
-	//~ octants.push_back(OCTANT_7);
-	//~ int index = round(_angle / 45);
+
+	//~ int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
+	//~ int next_y = (int)((_y + dy * sin(_angle)) / Environnement::scale);	
 	
-	int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
-	int next_y = (int)((_y + dy * sin(_angle)) / Environnement::scale);
+	//~ int next_x = (int)((_x + dx * sin(_angle)) / Environnement::scale);
+	//~ int next_y = (int)((_y + dy * (-cos(_angle))) / Environnement::scale);
+	
+	int next_x = (int)((_x + dx ) / Environnement::scale);
+	int next_y = (int)((_y + dy ) / Environnement::scale);
 	
 	if(this == _l->_guards[1]) printf("%f , %f : %d\n", (_x + dx * cos(_angle)), (_y + dy * sin(_angle)), _angle);
-	//~ int next_step = _l -> data (next_x,	next_y);
-	
-	// Ici je vérifiais que le cast était bien effectuer (pour rester dans le Lab)
-	//~ if(next_x >= _l->width()){
-		//~ printf("1 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
-	//~ }
-	//~ if(next_x < 0){
-		//~ printf("2 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
-	//~ }
-	//~ if(next_y < 0){
-		//~ printf("3 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
-	//~ }
-	//~ if(next_y >= _l->height()){
-		//~ printf("4 P(%d : %d) N(%d : %d)\n",(int)_x / Environnement::scale, (int)_y / Environnement::scale, (int)next_x / Environnement::scale, (int)next_y / Environnement::scale);
-	//~ }
-		
+	//~ int next_step = _l -> data (next_x,	next_y);		
 
 	if (((Labyrinthe *) _l)->isAccessible(next_x, next_y)){
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = EMPTY;
-		_x += dx * cos(_angle);
-        _y += dy * sin(_angle);
+		//~ _x += dx * cos(_angle);
+        //~ _y += dy * sin(_angle);
+		//~ _x += dx * sin(_angle);
+        //~ _y += dy * (-cos(_angle));
+		_x += dx;
+        _y += dy;
 		((Labyrinthe *)_l)->density[(int)(_x / Environnement::scale)][(int)(_y / Environnement::scale)] = GARDIEN;
 		return true;		
 	}
 
     // Set Angle Patrouille
-    setAngle();
+    //~ setAngle();
     
     // Set Angle Defense
 	return false;
@@ -244,7 +229,6 @@ bool Gardien::process_fireball (float dx, float dy)
 
 void Gardien::seekHunter(){
 	
-	
 }
 
 bool Gardien::targetHunter(){
@@ -327,11 +311,9 @@ void Gardien::setAngle() {
     // Do nothing because the minimum octant is already known
     
     //  
-    if (_behavior == PATROUILLE) {
-                       
+    if (_behavior == PATROUILLE) {         
         //
-        uniform_int_distribution<> direction(0, octants.size() - 1);
-        
+        uniform_int_distribution<> direction(0, octants.size() - 1);        
         //
         index = direction(rng);
         

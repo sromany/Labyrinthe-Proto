@@ -493,7 +493,7 @@ int Labyrinthe::getDistance(int x, int y) {
 	if (isAccessible(x, y)){
             return distance[x][y];
         }
-        return INT_MAX;
+	return INT_MAX;
 }
 
 //
@@ -502,7 +502,7 @@ bool Labyrinthe::removeBox(int x, int y) {
 	if ((x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] == BOX)){
 
 		for (int index = 0; index < _nboxes; index++){
-			
+
 			if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
 				density[x][y] = EMPTY;
 				memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
