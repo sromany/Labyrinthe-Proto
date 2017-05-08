@@ -112,7 +112,7 @@ class Labyrinthe : public Environnement {
         map<Box*, int> _objects;      
     // Public methods       
     public:
-        bool isValid(int x, int y);
+        bool inline isValid(int x, int y);
         bool isAccessible(int x, int y);
         bool isFree(int x, int y);
         bool isFree(double, double, Mover*);

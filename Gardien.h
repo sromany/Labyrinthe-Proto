@@ -6,7 +6,6 @@
 #include "Mover.h"
 #include "Sound.h"
 
-#define ATTAQUE 50
 #define DEFENSE 25
 #define PATROUILLE -25
 
@@ -54,7 +53,7 @@ class Gardien : public Mover {
 		void update (void);	
 
 		void compute_potentiel();
-		void seekHunter();
+		bool seekHunter();
 		bool targetHunter();
 
 		// et ne bouge pas!

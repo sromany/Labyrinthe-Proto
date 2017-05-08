@@ -31,7 +31,7 @@ Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y,
 {
 	_pv = 2;
 	_angle = 180;
-	_behavior = ATTAQUE;
+	_behavior = 0;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
 	_guard_hit = new Sound ("sons/guard_hit.wav");
 	if (_wall_hit == 0)
@@ -70,13 +70,11 @@ void Gardien::update(void) {
     if (distance * _pv) {
 		//~ printf("D %d\n", _distance_max);
         _potentiel = distance / _distance_max;
-
         _potentiel_max += _potentiel;
 
 		//~ printf("%lf , %d , %lf\n", _potentiel_max, _distance_max, _potentiel);
-
 		if (_potentiel_max < _potentiel + 1) {
-			_behavior = ATTAQUE;
+			_behavior = PATROUILLE;
 		} else {
 			_behavior = DEFENSE;
 		}
@@ -84,7 +82,7 @@ void Gardien::update(void) {
 
 
 	if(this->_pv > 0){
-		if(_behavior == ATTAQUE){
+		if(!seekHunter()){
 			if(fm.trigger == false)
 			{
 				fire(0);
@@ -100,9 +98,9 @@ void Gardien::update(void) {
 					}
 				}
 			}
-			//#s
+		//#s
 		}
-		//~ move(0., 0.3);
+		move(0.3, 0.3);
 	}else{
 		rester_au_sol();
 	}
@@ -137,10 +135,8 @@ bool Gardien::move (double dx, double dy) {
             //return true;
 	//}
 
-    // Set Angle Patrouille
-    //~ setAngle();
+    setAngle();
 
-    // Set Angle Defense
 	return false;
 }
 //#e
@@ -154,7 +150,7 @@ void Gardien::fire (int angle_vertical) {
     float	dist2 = (x*x + y*y);
     float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
-    _guard_fire -> play (exp(.6 - dist2/dmax2));
+    _guard_fire -> play (exp(.4 - dist2/dmax2));
 	_fb -> init (_x, _y, 10.,                /* position initiale de la boule xyz */
 				 angle_vertical, -_angle);    /* angle de visée vertical - horizontal */
 	fd.start = clock();
@@ -227,7 +223,7 @@ bool Gardien::process_fireball (float dx, float dy)
 	float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
-	_wall_hit -> play (exp(.4 - dist2/dmax2));
+	_wall_hit -> play (exp(0.01 - dist2/dmax2));
 
 	// Indique que la fireball a touche quelque chose
 	fm.hit = true;
@@ -235,8 +231,8 @@ bool Gardien::process_fireball (float dx, float dy)
 }
 
 
-void Gardien::seekHunter(){
-
+bool Gardien::seekHunter(){
+	return targetHunter();
 }
 
 bool Gardien::targetHunter(){

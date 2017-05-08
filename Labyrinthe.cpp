@@ -25,18 +25,14 @@ Labyrinthe::Labyrinthe (char* filename){
 	_win = new Sound ("sons/win.wav");
 	_lose = new Sound ("sons/lose.wav");
 	_ambiance = new Sound ("sons/ambiance.wav");
-	printf("A\n");
 	readFile(string(filename));
 
-	printf("B\n");
 	cout << "Nombre de murs: " << _nwall << endl;
 	cout << "Nombre d'affiches: " << _npicts << endl;
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
-
 	printMat(ascii, _width, _height);
 
-	printf("C\n");
 	computeDensity(ascii);
 
 	// On stock les murs
@@ -52,24 +48,21 @@ Labyrinthe::Labyrinthe (char* filename){
 	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
 
-        // On tous les elements
-        printf("E\n");
+	// On tous les elements
 	sortElements(ascii);
 
 	// On stock les gardiens et le chasseur
 	_guards = new Mover* [_nguards];
 
 	// On stock chasseur et les gardiens.
-	printf("F\n");
 	sortMovers(ascii);
 
 	//#s
-	printf("G\n");
 	computeDistances();
 	//#e
 
 	printf("%d  x %d\n", width(), height());
-	_ambiance->play(.5);
+	//~ _ambiance->play(.8);
 }
 
 void Labyrinthe::readFile(string fname){
@@ -414,7 +407,7 @@ void Labyrinthe::sortMovers(Mat<char> A){
 // Public methods
 
 //
-bool Labyrinthe::isValid(int x, int y) {
+bool inline Labyrinthe::isValid(int x, int y) {
     return (x >= 0 && x < _height) && (y >= 0 && y < _width);
 }
 
@@ -425,16 +418,18 @@ bool Labyrinthe::isAccessible(int x, int y) {
 
 //
 bool Labyrinthe::isFree(int x, int y) {
+	printf("%d , %d\n", x ,y);
     return isValid(x, y) && _density[x][y] == EMPTY;
 }
 
 //
 bool Labyrinthe::isFree(double x, double y, Mover* mover) {
 
-    int _x = (mover->_x + x) / Environnement::scale;
-    int _y = (mover->_y + y) / Environnement::scale;
+    int _x = (int)((mover->_x + x) / Environnement::scale);
+    int _y = (int)((mover->_y + y) / Environnement::scale);
 
-    return ((_x == ((int) mover->_x / Environnement::scale)) && (_y == ((int) mover->_y / Environnement::scale))) || isFree(_x, _y);
+    return ((_x == ((int) (mover->_x / Environnement::scale)) ) && (_y == ((int) (mover->_y / Environnement::scale)))) 
+    || isFree(_x, _y);
 
 }
 
@@ -458,23 +453,32 @@ bool Labyrinthe::update(int x, int y) {
 //
 bool Labyrinthe::update(double x, double y, Mover* mover) {
 
+	printf("A\n");
     if(isFree(x, y, mover)) {
-
-        int i = mover->_x / Environnement::scale;
-        int j = mover->_y / Environnement::scale;
-
+	printf("B\n");
+        int i = (int)(mover->_x / Environnement::scale);
+        int j = (int)(mover->_y / Environnement::scale);
+        if(i < 0) i = 0;
+		if(i >= _height) i = _height - 1;
+		if(j < 0) j = 0;
+		if(j >= _width) j = _width - 1;
+	printf("C\n");
         int code = _density[i][j];
-
+	printf("D\n");
         _density[i][j] = EMPTY;
-
-        mover->_x += x;
-        mover->_y += y;
-
-        int k = mover->_x / Environnement::scale;
-        int l = mover->_y / Environnement::scale;
-
+	printf("E\n");
+        mover->_x += x * cos(mover->_angle);
+        mover->_y += y * sin(mover->_angle);
+	printf("F\n");
+        int k = (int)(mover->_x / Environnement::scale);
+        int l = (int)(mover->_y / Environnement::scale);
+	printf("G\n");
+		if(k < 0) k = 0;
+		if(k >= _height) k = _height - 1;
+		if(l < 0) l = 0;
+		if(l >= _width) l = _width - 1;
         _density[k][l] = code;
-
+	printf("H\n");
         return true;
 
     }
@@ -503,24 +507,23 @@ void Labyrinthe::free(Mover* mover) {
 void Labyrinthe::computeDensity(vector<vector<char>> codes) {
 
     for(int i = 0; i < _height; i++) {
-	for(int j = 0; j < _width; j++) {
+		for(int j = 0; j < _width; j++) {
+			_density.push_back(vector<int>(_width));
 
-            _density.push_back(vector<int>(_width));
-
-            if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || codes[i][j] == 'a' || codes[i][j] == 'b')
+			if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || ((codes[i][j] >= 'a' && codes[i][j] <= 'z') && codes[i][j] != 'x'))
                 _density[i][j] = MUR;
             else if(codes[i][j] == 'C')
-		_density[i][j] = CHASSEUR;
+				_density[i][j] = CHASSEUR;
             else if(codes[i][j] == 'G')
-		_density[i][j] = GARDIEN;
+				_density[i][j] = GARDIEN;
             else if(codes[i][j] == 'T')
-		_density[i][j] = TRESOR;
+				_density[i][j] = TRESOR;
             else if(codes[i][j] == '%')
-		_density[i][j] = PORTAL;
+				_density[i][j] = PORTAL;
             else if(codes[i][j] == 'x')
-		_density[i][j] = BOX;
+				_density[i][j] = BOX;
             else
-		_density[i][j] = EMPTY;
+				_density[i][j] = EMPTY;
 
         }
     }
