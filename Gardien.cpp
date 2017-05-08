@@ -227,13 +227,13 @@ bool Gardien::seekHunter(){
 	//~ float m = (chasseur->_y - _y) / (chasseur->_x -_x);
 	//~ float p = _y - (m * _x);
 	
-	while(_l->isAccessible((int)(x / (float)(Environnement::scale)), (int)(y / (float)(Environnement::scale)){
-		x = 0.1-p;
-		dy = m*dx + p;
+	//~ while(_l->isAccessible((int)(x / (float)(Environnement::scale)), (int)(y / (float)(Environnement::scale)){
+		//~ x = 0.1-p;
+		//~ dy = m*dx + p;
 		
-		dx += 0.1;
-		dy += 0.1;
-	}
+		//~ dx += 0.1;
+		//~ dy += 0.1;
+	//~ }
 		
 	return true;
 }
