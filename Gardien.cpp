@@ -98,7 +98,7 @@ void Gardien::update(void) {
 			}
 		//#s
 		}
-		//~ move(0.3, 0.3);
+		move(0.3, 0.3);
 	}else{
 		rester_au_sol();
 	}
@@ -138,7 +138,7 @@ void Gardien::fire (int angle_vertical) {
     float	dist2 = (x*x + y*y);
     float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
-    _guard_fire -> play (exp(.4 - dist2/dmax2));
+    _guard_fire -> play (exp(.0000000001 - dist2/dmax2));
 	_fb -> init (_x, _y, 10.,                 /* position initiale de la boule xyz */
 				 angle_vertical, -_angle);    /* angle de visée vertical - horizontal */
 	fd.start = clock();
@@ -211,7 +211,7 @@ bool Gardien::process_fireball (float dx, float dy)
 	float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
 	// faire exploser la boule de feu avec un bruit fonction de la distance.
-	_wall_hit -> play (exp(0.01 - dist2/dmax2));
+	_wall_hit -> play (exp(0.0001 - dist2/dmax2));
 
 	// Indique que la fireball a touche quelque chose
 	fm.hit = true;
@@ -220,11 +220,31 @@ bool Gardien::process_fireball (float dx, float dy)
 
 
 bool Gardien::seekHunter(){
-	return targetHunter();
+	
+	// Ici on fait l'équation de la droite entre this et chasseur
+	// et on la parcours avec un pas dx et dy
+	//~ float x = _x, y = _y;
+	//~ float m = (chasseur->_y - _y) / (chasseur->_x -_x);
+	//~ float p = _y - (m * _x);
+	
+	//~ while(_l->isAccessible((int)(x / (float)(Environnement::scale)), (int)(y / (float)(Environnement::scale)){
+		//~ x = 0.1-p;
+		//~ dy = m*dx + p;
+		
+		//~ dx += 0.1;
+		//~ dy += 0.1;
+	//~ }
+		
+	return true;
 }
 
 bool Gardien::targetHunter(){
-	return _behavior == DEFENSE;
+	//  Ici on vérifie qu'on voit bien le chasseur
+	if(seekHunter()){
+		// Ici on configure l'angle pour que le gardien attaque le chasseur
+		return true;
+	}
+	return false;
 }
 //#s
 
