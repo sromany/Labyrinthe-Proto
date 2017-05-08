@@ -115,27 +115,17 @@ bool Gardien::move (double dx, double dy) {
 	//~ int next_x = (int)((_x + dx * cos(_angle)) / Environnement::scale);
 	//~ int next_y = (int)((_y + dy * sin(_angle)) / Environnement::scale);
 
-	//~ int next_x = (int)((_x + dx * sin(_angle)) / Environnement::scale);
-	//~ int next_y = (int)((_y + dy * (-cos(_angle))) / Environnement::scale);
-
 	//int next_x = (int)((_x + dx ) / Environnement::scale);
 	//int next_y = (int)((_y + dy ) / Environnement::scale);
 
 	//if(this == _l->_guards[1]) printf("%f , %f : %d\n", (_x + dx * cos(_angle)), (_y + dy * sin(_angle)), _angle);
 	//~ int next_step = _l -> data (next_x,	next_y);
 
-	//if (((Labyrinthe *) _l)->isFree(dx, dy, this)){
-		//~ _x += dx * cos(_angle);
-		//~ _y += dy * sin(_angle);
-		//~ _x += dx * sin(_angle);
-		//~ _y += dy * (-cos(_angle));
-		return ((Labyrinthe *)_l)->update(dx, dy, this);
-		//return true;
-	//}
-
-    setAngle();
-
-	return false;
+	if (!(((Labyrinthe *)_l)->update(dx * cos(_angle), dy * sin(_angle), this))) {   
+        setAngle();
+        return false;
+    }
+    return true;
 }
 //#e
 
