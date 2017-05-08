@@ -202,7 +202,7 @@ void Labyrinthe::countAllData(Mat<char> A){
 	for(int i = 0; i < _height; i++){
 		for(int j = 0; j < _width; j++){
                         //#s
-                        if(A[i][j] == 'x' || A[i][j] == '%'){
+                        if(A[i][j] == 'x' || A[i][j] == 'N'){
 				k++;
 			}
                         //#e
@@ -391,15 +391,6 @@ int Labyrinthe::getDistance(int x, int y) {
 }
 
 //
-bool Labyrinthe::update(int x, int y) {
-    if (!isAccessible(x, y) && updateBox(x, y)) {
-         reconfigure();
-         return true;
-    }
-    return false;
-}
-
-//
 bool Labyrinthe::update(double x, double y, Mover* mover) {
 
 	printf("A\n");
@@ -467,13 +458,13 @@ void Labyrinthe::computeDensity(vector<vector<char>> codes) {
             
                 _density[i][j] = MUR;
             
-            } else if(codes[i][j] == 'C') {          
+            } else if (codes[i][j] == 'C') {          
 		
                 _density[i][j] = CHASSEUR;
                 
                 _guards[0] = new Chasseur(this, i * Environnement::scale, j * Environnement::scale);
                 
-            } else if(codes[i][j] == 'G') {
+            } else if (codes[i][j] == 'G') {
                 
 		_density[i][j] = GARDIEN;
                 
@@ -481,19 +472,25 @@ void Labyrinthe::computeDensity(vector<vector<char>> codes) {
                 
                 guardians++;
                 
-            } else if(codes[i][j] == 'T') {
+            } else if (codes[i][j] == 'T') {
 		
                 _density[i][j] = TRESOR;
                 
                 _treasor._x = i;
                 _treasor._y = j;
                 
-            } else if(codes[i][j] == 'x') {
+            } else if ((codes[i][j] == 'x') || (codes[i][j] == 'N')){
 		
                 _density[i][j] = BOX;
                 
                 _boxes[boxes]._x = i;
                 _boxes[boxes]._y = j;
+                                                
+                if(codes[i][j] == 'N') {
+		
+                    _objects.insert(make_pair(&_density[i][j], GARDIEN));
+                
+                }
                 
                 boxes++;
                 
