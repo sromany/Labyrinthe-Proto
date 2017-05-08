@@ -81,7 +81,7 @@ bool Chasseur::process_fireball (float dx, float dy)
 
     //#s
     // Update the labyrinth
-    ((Labyrinthe*) _l)->update(next_x, next_y);
+    //((Labyrinthe*) _l)->update(next_x, next_y,);
     //#e
 
 	for(int i = 1; i <_l->_nguards; i++){

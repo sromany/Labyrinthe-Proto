@@ -105,7 +105,7 @@ class Labyrinthe : public Environnement {
         // Distance matrix
         vector<vector<int>> _distances;
         // Objects
-        map<Box*, int> _objects;      
+        map<int*, int> _objects;      
     // Public methods       
     public:
         bool inline isValid(int x, int y);
@@ -113,7 +113,6 @@ class Labyrinthe : public Environnement {
         bool isFree(int x, int y);
         bool isFree(double, double, Mover*);
         int getDistance(int x, int y);
-        bool update(int x, int y);
         bool update(double, double, Mover*);
         void free(int x, int y);
         void free(Mover*);
