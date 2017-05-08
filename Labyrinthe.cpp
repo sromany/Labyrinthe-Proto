@@ -24,7 +24,7 @@ Environnement* Environnement::init (char* filename)
 Labyrinthe::Labyrinthe (char* filename){
 	_win = new Sound ("sons/win.wav");
 	_lose = new Sound ("sons/lose.wav");
-	_ambiance = new Sound ("sons/win.wav");
+	_ambiance = new Sound ("sons/ambiance.wav");
 	printf("A\n");
 	readFile(string(filename));
 
