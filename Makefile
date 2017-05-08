@@ -11,7 +11,7 @@ OBJ			= Labyrinthe.obj Chasseur.obj Gardien.obj
 WLIBGLUT	= Libs/glut32.lib
 WINCGLUT	= Libs/include
 
-LIBS64		= $(FMOD)/libfmodex64.so /usr/lib64/libglut.so.3 -lGLU -lGL /usr/lib64/libjpeg.so.62 -lm
+LIBS64		= $(FMOD)/libfmodex64.so -lglut -lGLU -lGL -L jpeg -ljpeg64 -lm
 LIBS		= $(FMOD)/libfmodex.so -lglut -lGLU -lGL -ljpeg -lm
 WLIBS		= $(WLIBGLUT) -defaultlib:OPENGL32 -defaultlib:GLU32 gdi32.lib jpeg/libjpeg.lib $(WFMOD)/fmodex_vc.lib
 MLIBS		= -framework GLUT -framework OpenGL -framework Foundation jpeg/libjpeg.a fmod/Developer/FMOD\ Programmers\ API\ Mac/api/lib/libfmodex.dylib
@@ -41,7 +41,7 @@ cstrike.exe: Labyrinthe.obj Chasseur.obj
 	link -nologo -out:$@ Labyrinthe.obj Chasseur.obj $(WLIBS) -defaultlib:OpenGL.lib
 
 clean:
-	@rm -f cstrike $(O) macstrike cstrike.exe $(OBJ)
+	@rm -f cstrike cstrike64 $(O) macstrike cstrike.exe $(OBJ)
 
 Labyrinthe.o:	Labyrinthe.h Chasseur.h Gardien.h
 Chasseur.o:   Chasseur.cpp Chasseur.h
