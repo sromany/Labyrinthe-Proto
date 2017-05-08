@@ -106,6 +106,9 @@ class Labyrinthe : public Environnement {
 		//~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
 		vector<string> texFile;
 		vector<char> texTab;
+	
+		// Teleporters
+		vector<pair<int, int>> _teleporters;
 		 
     // Public methods
     public:
