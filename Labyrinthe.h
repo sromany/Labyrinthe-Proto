@@ -88,11 +88,7 @@ class Labyrinthe : public Environnement {
             int  countWalls(Mat<char> A);
             void countAllData(Mat<char> A);
             void sortWallsAndPicts(Mat<char> A);
-            void sortElements(Mat<char> A);
-            void sortMovers(Mat<char> A);
-
-            void makeDensity(Mat<char> A, Mat<int>& B);
-            
+	
     //#s            
     // Public attributes       
     public:       
