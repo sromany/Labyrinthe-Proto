@@ -223,17 +223,20 @@ bool Gardien::seekHunter(){
 	
 	// Ici on fait l'équation de la droite entre this et chasseur
 	// et on la parcours avec un pas dx et dy
-	//~ float x = _x, y = _y;
-	//~ float m = (chasseur->_y - _y) / (chasseur->_x -_x);
-	//~ float p = _y - (m * _x);
+	float dx = _x, dy = _y;
+	float step = 0.1;
+	float m = (chasseur->_y - _y) / (chasseur->_x -_x);
+	float p = _y - (m * _x);
 	
-	//~ while(_l->isAccessible((int)(x / (float)(Environnement::scale)), (int)(y / (float)(Environnement::scale)){
-		//~ x = 0.1-p;
-		//~ dy = m*dx + p;
-		
-		//~ dx += 0.1;
-		//~ dy += 0.1;
-	//~ }
+	if(_x > chasseur->_x){
+		step *= -1.0;
+	}
+	
+	while(_l->isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)){
+		dx += step;
+		dy = m*dx + p;
+		if(dx > )
+	}
 		
 	return true;
 }
