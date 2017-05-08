@@ -435,6 +435,44 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
 	printf("H\n");
         return true;
     }
+	
+    int i = (int)((mover->_x + x)/ Environnement::scale);
+    int j = (int)((mover->_y + y)/ Environnement::scale);    
+        
+    if (isValid(i, j) && (_density[i][j] == MUR) && (_ascii[i][j] == 'p')) {
+        
+    //
+    random_device rd;  
+    //
+    mt19937 rng(rd());
+    
+    //
+    uniform_int_distribution<> teleporters(0, _teleporters.size()-1);        
+    
+    pair<int, int> teleporter = _teleporters[teleporters(rng)];
+    
+    int m = teleporter.first;
+    int n = teleporter.second;
+    
+    for (int k = -1; i <= 1; k++) {
+	for (int l = -1; l <= 1; l++) {
+            if ((k == 0) && (l == 0)) {
+                continue;
+            }
+            if (getDistance(m + k, n + l) < getDistance(teleporter.first, teleporter.second)) {
+                teleporter.first = m + k;
+                teleporter.second = n + l;
+            }
+	}
+    }    
+    
+    mover->_x = teleporter.first * Environnement::scale;
+    mover->_y = teleporter.second * Environnement::scale;
+    
+    return true;
+    
+    }
+	
     return false;
 }
 
@@ -479,6 +517,11 @@ void Labyrinthe::computeDensity(vector<vector<char>> codes) {
             if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || ((codes[i][j] >= 'a' && codes[i][j] <= 'z') && codes[i][j] != 'x')) {
             
                 _density[i][j] = MUR;
+		
+		// Teleporter
+ 		if (codes[i][j] == 'p') {
+                    _teleporters.push_back(make_pair(i, j));
+                }		    
             
             } else if (codes[i][j] == 'C') {          
 		
