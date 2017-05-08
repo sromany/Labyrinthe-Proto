@@ -115,3 +115,12 @@
     -Ne tiens pas encore compte du panoramique                          #
         -Par rapport à l'origine du son                                 |
 ========================================================================/
+
+
+
+=====Bande sonores======================================================
+Crédits:
+http://lasonotheque.org/
+http://www.sound-fishing.net/
+========================================================================
+

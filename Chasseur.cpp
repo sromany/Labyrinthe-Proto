@@ -8,7 +8,7 @@
 
 Chasseur::Chasseur (Labyrinthe* l, int x, int y) : Mover (x, y, l, 0)
 {
-	_pv = 3;
+	_pv = 5;
 	first = true;
 	pas_encore_lose = true;
 	_hunter_fire = new Sound ("sons/hunter_fire.wav");

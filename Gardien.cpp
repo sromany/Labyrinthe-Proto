@@ -29,7 +29,7 @@ bool Gardien::first = true;
 //Constructor
 Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y, l, modele)
 {
-	_pv = 2;
+	_pv = 4;
 	_angle = 180;
 	_behavior = 0;
 	_guard_fire = new Sound ("sons/guard_fire.wav");
@@ -80,7 +80,8 @@ void Gardien::update(void) {
     }
 
 	if(this->_pv > 0){
-		if(seekHunter()){
+		//~ if(seekHunter()){
+		if(_behavior == PATROUILLE){
 			if(fm.trigger == false)
 			{
 				fire(0);
@@ -251,7 +252,8 @@ bool Gardien::seekHunter(){
 		dy = m*dx + p;
 		dr = (dx - chasseur->_x) * (dx - chasseur->_x) + (dy - chasseur->_y)*(dy - chasseur->_y);
 		if(dr > -0.7 || dr < 0.7){
-			_angle = acos((dx - _x) / dist);
+			//~ _angle = 1. / cos((dx - _x) / dist);
+			printf("TRUE\n");
 			return true;
 		}
 	}
@@ -330,9 +332,7 @@ void Gardien::setAngle() {
     //
     mt19937 rng(rd());
     
-    if(seekHunter()){
-		
-	}else{
+  
 		// if (_behavior == DEFENSE)
 		// Do nothing because the minimum octant is already known
 
@@ -352,7 +352,6 @@ void Gardien::setAngle() {
 
 		//
 		_angle = angle(rng);
-	}
     //
     if (_angle < 0) {
         _angle += 360;
