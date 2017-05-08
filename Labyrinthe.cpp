@@ -428,8 +428,7 @@ bool Labyrinthe::isFree(double x, double y, Mover* mover) {
     int _x = (int)((mover->_x + x) / Environnement::scale);
     int _y = (int)((mover->_y + y) / Environnement::scale);
 
-    return ((_x == ((int) (mover->_x / Environnement::scale)) ) && (_y == ((int) (mover->_y / Environnement::scale)))) 
-    || isFree(_x, _y);
+    return ((_x == ((int) (mover->_x / Environnement::scale)) ) && (_y == ((int) (mover->_y / Environnement::scale))) && isValid(_x, _y)) || isFree(_x, _y);
 
 }
 
