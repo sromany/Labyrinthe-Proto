@@ -424,7 +424,7 @@ bool Labyrinthe::isFree(int x, int y) {
 
 //
 bool Labyrinthe::isFree(double x, double y, Mover* mover) {
-
+	
     int _x = (int)((mover->_x + x) / Environnement::scale);
     int _y = (int)((mover->_y + y) / Environnement::scale);
 
@@ -466,8 +466,8 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
 	printf("D\n");
         _density[i][j] = EMPTY;
 	printf("E\n");
-        mover->_x += x * cos(mover-> _angle);
-        mover->_y += y * sin(mover->_angle);
+        mover->_x += x;
+        mover->_y += y;
 	printf("F\n");
         int k = (int)(mover->_x / Environnement::scale);
         int l = (int)(mover->_y / Environnement::scale);

@@ -139,7 +139,7 @@ void Gardien::fire (int angle_vertical) {
     float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
     _guard_fire -> play (exp(.4 - dist2/dmax2));
-	_fb -> init (_x, _y, 10.,                /* position initiale de la boule xyz */
+	_fb -> init (_x, _y, 10.,                 /* position initiale de la boule xyz */
 				 angle_vertical, -_angle);    /* angle de visée vertical - horizontal */
 	fd.start = clock();
 }
