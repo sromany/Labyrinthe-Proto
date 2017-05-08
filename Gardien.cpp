@@ -98,7 +98,7 @@ void Gardien::update(void) {
 			}
 		//#s
 		}
-		//~ move(0.3, 0.3);
+		move(0.3, 0.3);
 	}else{
 		rester_au_sol();
 	}
@@ -220,11 +220,31 @@ bool Gardien::process_fireball (float dx, float dy)
 
 
 bool Gardien::seekHunter(){
-	return targetHunter();
+	
+	// Ici on fait l'équation de la droite entre this et chasseur
+	// et on la parcours avec un pas dx et dy
+	//~ float x = _x, y = _y;
+	//~ float m = (chasseur->_y - _y) / (chasseur->_x -_x);
+	//~ float p = _y - (m * _x);
+	
+	//~ while(_l->isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)){
+		//~ x = 0.1-p;
+		//~ dy = m*dx + p;
+		
+		//~ dx += 0.1;
+		//~ dy += 0.1;
+	//~ }
+		
+	return true;
 }
 
 bool Gardien::targetHunter(){
-	return _behavior == DEFENSE;
+	//  Ici on vérifie qu'on voit bien le chasseur
+	if(seekHunter()){
+		// Ici on configure l'angle pour que le gardien attaque le chasseur
+		return true;
+	}
+	return false;
 }
 //#s
 
