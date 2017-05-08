@@ -236,33 +236,28 @@ bool Gardien::seekHunter(){
 	// Ici on fait l'équation de la droite entre this et chasseur
 	// et on la parcours avec un pas dx et dy
 	Chasseur * chasseur = ((Chasseur *) ((Labyrinthe *)_l)->_guards[0]);
-	float dx = _x, dy = _y;
+	float dr, dx = _x, dy = _y;
 	float step = 0.1;
 	float m = (chasseur->_y - _y) / (chasseur->_x -_x);
 	float p = _y - (m * _x);
+	float dist = (_x - chasseur->_x) * (_x - chasseur->_x) + (_y - chasseur->_y) * (_y - chasseur->_y);
 	
 	if(_x > chasseur->_x){
 		step *= -1.0;
 	}
 	
-	//~ while((Labyrinthe*) _l)>isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)){
-		//~ dx += step;
-		//~ dy = m*dx + p;
-		//~ if(dx > )
-	//~ }
-		
-	return true;
-}
-
-bool Gardien::targetHunter(){
-	//  Ici on vérifie qu'on voit bien le chasseur
-	if(seekHunter()){
-		// Ici on configure l'angle pour que le gardien attaque le chasseur
-		return true;
+	while(((Labyrinthe*) _l)->isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)))){
+		dx += step;
+		dy = m*dx + p;
+		dr = (dx - chasseur->_x) * (dx - chasseur->_x) + (dy - chasseur->_y)*(dy - chasseur->_y);
+		if(dr > -0.7 || dr < 0.7){
+			_angle = acos((dx - _x) / dist);
+			return true;
+		}
 	}
 	return false;
 }
-//#s
+
 
 void Gardien::setAngle() {
 
@@ -334,30 +329,30 @@ void Gardien::setAngle() {
     random_device rd;
     //
     mt19937 rng(rd());
+    
+    if(seekHunter()){
+		
+	}else{
+		// if (_behavior == DEFENSE)
+		// Do nothing because the minimum octant is already known
 
-    // if (_behavior == DEFENSE)
-    // Do nothing because the minimum octant is already known
+		//
+		if (_behavior == PATROUILLE) {
+			//
+			uniform_int_distribution<> direction(0, octants.size() - 1);
+			//
+			index = direction(rng);
+		}
 
-    //
-    if (_behavior == PATROUILLE) {
-        //
-        uniform_int_distribution<> direction(0, octants.size() - 1);
-        //
-        index = direction(rng);
+		// Retrieve octant
+		int octant = octants[index].first;
 
-    }
+		//
+		uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
 
-    // Retrieve octant
-    int octant = octants[index].first;
-
-    //
-    uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
-    //~ uniform_int_distribution<> angle_generator(0, 360);
-
-    //
-    _angle = angle(rng);
-    //~ _angle = angle_generator(rng);
-
+		//
+		_angle = angle(rng);
+	}
     //
     if (_angle < 0) {
         _angle += 360;
