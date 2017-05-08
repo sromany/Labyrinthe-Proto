@@ -457,10 +457,6 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
 	printf("B\n");
         int i = (int)(mover->_x / Environnement::scale);
         int j = (int)(mover->_y / Environnement::scale);
-        if(i < 0) i = 0;
-		if(i >= _height) i = _height - 1;
-		if(j < 0) j = 0;
-		if(j >= _width) j = _width - 1;
 	printf("C\n");
         int code = _density[i][j];
 	printf("D\n");
@@ -472,10 +468,6 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
         int k = (int)(mover->_x / Environnement::scale);
         int l = (int)(mover->_y / Environnement::scale);
 	printf("G\n");
-		if(k < 0) k = 0;
-		if(k >= _height) k = _height - 1;
-		if(l < 0) l = 0;
-		if(l >= _width) l = _width - 1;
         _density[k][l] = code;
 	printf("H\n");
         return true;
