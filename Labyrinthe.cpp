@@ -32,9 +32,7 @@ Labyrinthe::Labyrinthe (char* filename){
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
 	printMat(ascii, _width, _height);
-
-	computeDensity(ascii);
-
+	
 	// On stock les murs
 	_walls = new Wall[_nwall];
 
@@ -48,16 +46,13 @@ Labyrinthe::Labyrinthe (char* filename){
 	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
 
-	// On tous les elements
-	sortElements(ascii);
-
 	// On stock les gardiens et le chasseur
 	_guards = new Mover* [_nguards];
 
-	// On stock chasseur et les gardiens.
-	sortMovers(ascii);
-
 	//#s
+        //
+        computeDensity(ascii);
+        //
 	computeDistances();
 	//#e
 
@@ -358,51 +353,6 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 	cout <<"Nb de mur V:" << v << endl;
 }
 
-void Labyrinthe::sortElements(Mat<char> A){
-
-	int k = 0;
-	for(int i = 0; i < _height; i++){
-		for(int j = 0; j < _width; j++){
-			if((A[i][j] == 'x') || (A[i][j] == '%')) {
-				_boxes[k]._x = i;
-				_boxes[k]._y = j;
-				k++;
-			}
-			if(A[i][j] == 'T'){
-				_treasor._x = i;
-				_treasor._y = j;
-			}
-                //#s
-            if(A[i][j] == '%'){
-			}
-                //#e
-		}
-	}
-}
-
-void Labyrinthe::sortMovers(Mat<char> A){
-	int k = 1;
-	vector<string> guardianName({"drfreak","garde","Marvin","Potator"});
-	std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> g(0, guardianName.size()-1);
-
-	for(int i = 0; i < _height; i++){
-		for(int j = 0; j < _width; j++){
-			if(A[i][j] == 'C'){
-				_guards[0] = new Chasseur(this, i*Environnement::scale, j*Environnement::scale);
-			}
-			if(A[i][j] == 'G'){
-				_guards[k] = new Gardien (this, i*Environnement::scale, j*Environnement::scale, guardianName[g(gen)].c_str()/* Random value i in Guardian Name*/);
-				k++;
-			}
-		}
-	}
-}
-/**
- ** Ajouter Dijkstra ici !!!
- **/
-
 //#s
 // Public methods
 
@@ -494,25 +444,65 @@ void Labyrinthe::free(Mover* mover) {
 //
 void Labyrinthe::computeDensity(vector<vector<char>> codes) {
 
+    int guardians = 1;
+    int boxes = 0;
+    
+    //
+    vector<string> models({"drfreak", "garde", "Marvin", "Potator"});
+    
+    //
+    random_device rd;  
+    //
+    mt19937 rng(rd());
+    
+    //
+    uniform_int_distribution<> guardian(0, models.size()-1);
+    
     for(int i = 0; i < _height; i++) {
-		for(int j = 0; j < _width; j++) {
-			_density.push_back(vector<int>(_width));
+	for(int j = 0; j < _width; j++) {
+	
+            _density.push_back(vector<int>(_width));
 
-			if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || ((codes[i][j] >= 'a' && codes[i][j] <= 'z') && codes[i][j] != 'x'))
+            if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || ((codes[i][j] >= 'a' && codes[i][j] <= 'z') && codes[i][j] != 'x')) {
+            
                 _density[i][j] = MUR;
-            else if(codes[i][j] == 'C')
-				_density[i][j] = CHASSEUR;
-            else if(codes[i][j] == 'G')
-				_density[i][j] = GARDIEN;
-            else if(codes[i][j] == 'T')
-				_density[i][j] = TRESOR;
-            else if(codes[i][j] == '%')
-				_density[i][j] = PORTAL;
-            else if(codes[i][j] == 'x')
-				_density[i][j] = BOX;
-            else
-				_density[i][j] = EMPTY;
-
+            
+            } else if(codes[i][j] == 'C') {          
+		
+                _density[i][j] = CHASSEUR;
+                
+                _guards[0] = new Chasseur(this, i * Environnement::scale, j * Environnement::scale);
+                
+            } else if(codes[i][j] == 'G') {
+                
+		_density[i][j] = GARDIEN;
+                
+                _guards[guardians] = new Gardien (this, i * Environnement::scale, j * Environnement::scale, models[guardian(rng)].c_str());                
+                
+                guardians++;
+                
+            } else if(codes[i][j] == 'T') {
+		
+                _density[i][j] = TRESOR;
+                
+                _treasor._x = i;
+                _treasor._y = j;
+                
+            } else if(codes[i][j] == 'x') {
+		
+                _density[i][j] = BOX;
+                
+                _boxes[boxes]._x = i;
+                _boxes[boxes]._y = j;
+                
+                boxes++;
+                
+            } else {
+	
+                _density[i][j] = EMPTY;           
+                
+            }
+            
         }
     }
 
