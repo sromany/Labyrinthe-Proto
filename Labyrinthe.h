@@ -7,6 +7,7 @@
 	#include <iostream>
 	#include <fstream>
 	#include <vector>
+        #include <map>
 	#include <iomanip>
 	#include <string>
 	#include <algorithm>
@@ -18,7 +19,6 @@
 	#define TRESOR 7
 	#define PORTAL 4
 	#define BOX 5	
-
 	
 	using namespace std;
 
@@ -26,16 +26,7 @@
 		int i, j;
 		int x, y;
 	}coord;
-	
-        /**
-         * //#s
-	typedef struct Teleporter{
-		Wall **_t;
-		coord * _exit;
-	}Teleporter;
-         * //#e
-         */
-
+	        
 	/**
 	 ** Template for std::vector<std::vector<T>> as Mat<T>
 	 **/
@@ -68,49 +59,26 @@
 		}
 	}
 
-	class Labyrinthe : public Environnement {
+class Labyrinthe : public Environnement {
 
         private:
             //~ Matrice du labyrinthe en ascii
             Mat<char> ascii;
-
-            //~ Matrice des distances
-            Mat<int> distance;
-
-            //~ Dimension du labyrinthe
-            int lab_width;
-            int lab_height;                   
-
+                             
             //~ Table de correspondances et table contenant le nom des fichiers de texture pour les affiches
             //~ Exemple if('a' = texTab[i]) alors texFile[i] = fichier texture correspondant à 'a'
             vector<string> texFile;
             vector<char> texTab;
-            
-		public:
-            //~ Matrice de colision
-            Mat<int> density;
-            
-            //~ Matrice des distance
-            Mat<int> distances;
-            
-            //~ Teleporteur
-            Teleporter _teleporters;
-            
-            //~ Nombre de téléporteurs
-            int _nteleporter;
-			
+            		                       	
         public:
             Labyrinthe (char*);
-            int width () { return lab_height;}	// retourne la largeur du labyrinthe.
-            int height () { return lab_width;}	// retourne la longueur du labyrinthe.
+            int width () { return _height;}	// retourne la largeur du labyrinthe.
+            int height () { return _width;}	// retourne la longueur du labyrinthe.
             char data (int i, int j)
             {
-                return density[i][j];
+                return _density[i][j];
             }	// retourne la case (i, j).
 			
-            bool isAccessible(int x, int y);
-            int getDistance(int x, int y);
-            bool removeBox(int x, int y);
             void printInFileMat(const Mat<int>& A, const char* fname);
 			
         private:
@@ -124,8 +92,42 @@
             void sortMovers(Mat<char> A);
 
             void makeDensity(Mat<char> A, Mat<int>& B);
-            void makePCC(Mat<int> A, Mat<int>& B);
-            int updateDistance(int x, int y);
+            
+    //#s            
+    // Public attributes       
+    public:       
+    // Private attributes
+    	static Sound*	_win;
+		static Sound*	_lose;
+		static Sound*	_ambiance;
+    private:
+        // Dimensions
+        int _width;
+        int _height; 
+        //
+        vector<vector<int>> _density;
+        // Distance matrix
+        vector<vector<int>> _distances;
+        // Objects
+        map<Box*, int> _objects;      
+    // Public methods       
+    public:
+        bool isValid(int x, int y);
+        bool isAccessible(int x, int y);
+        bool isFree(int x, int y);
+        bool isFree(double, double, Mover*);
+        int getDistance(int x, int y);
+        bool update(int x, int y);
+        bool update(double, double, Mover*);
+        void free(int x, int y);
+        void free(Mover*);
+    // Private methods
+    private:    
+        void computeDensity(vector<vector<char>>);
+        void computeDistances();
+        bool updateBox(int x, int y);
+        int updateDistance(int x, int y);            
+    //#e    
 		
-	};
+};
 #endif

@@ -36,6 +36,7 @@ class Gardien : public Mover {
 		static Sound*	_guard_fire;	// bruit de l'arme du gardien.
 		static Sound*	_guard_hit;	    // cri du gardien touché.
 		static Sound*	_wall_hit;		// on a tapé un mur.
+		static bool first;
 		int _pv;
 		int _behavior;
 

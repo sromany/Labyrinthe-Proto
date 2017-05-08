@@ -1,10 +1,10 @@
-#define VECTOR_VERSION
-#include "Labyrinthe.h"
-#include "Chasseur.h"
-#include "Gardien.h"
-#include <random>
 #include <climits>
 #include <cmath>
+#include <random>
+#include <utility>
+#include "Chasseur.h"
+#include "Gardien.h"
+#include "Labyrinthe.h"
 
 Sound*	Chasseur::_hunter_fire;	// bruit de l'arme du chasseur.
 Sound*	Chasseur::_hunter_hit;	// cri du chasseur touché.
@@ -12,6 +12,9 @@ Sound*	Gardien::_guard_fire;	// bruit de l'arme du gardien.
 Sound*	Gardien::_guard_hit;	// cri du gardien touché.
 Sound*	Chasseur::_wall_hit;	// on a tapé un mur.
 Sound*	Gardien::_wall_hit;	    // un gardien a tapé un mur.
+Sound*  Labyrinthe::_win;
+Sound*  Labyrinthe::_lose;
+Sound*  Labyrinthe::_ambiance;
 
 Environnement* Environnement::init (char* filename)
 {
@@ -19,39 +22,35 @@ Environnement* Environnement::init (char* filename)
 }
 
 Labyrinthe::Labyrinthe (char* filename){
+	_win = new Sound ("sons/win.wav");
+	_lose = new Sound ("sons/lose.wav");
+	_ambiance = new Sound ("sons/win.wav");
 	printf("A\n");
 	readFile(string(filename));
-	
+
 	printf("B\n");
 	cout << "Nombre de murs: " << _nwall << endl;
 	cout << "Nombre d'affiches: " << _npicts << endl;
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
-        //#s
-        cout << "Nombre de teleporter: " << _nteleporter << endl;
-        //#e
-	printMat(ascii, lab_width, lab_height);
-	
+
+	printMat(ascii, _width, _height);
+
 	printf("C\n");
-	makeDensity(ascii, density);
+	computeDensity(ascii);
 
 	// On stock les murs
 	_walls = new Wall[_nwall];
 
 	// On stock les affiches.
 	//string texfiles[_npict];
-	_picts = new Wall[_npicts];	
-                
+	_picts = new Wall[_npicts];
+
 	printf("D\n");
 	sortWallsAndPicts(ascii);
 	// On stock les boxes.
 	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
-        
-        //#s
-        //
-	_teleporters = new Box [_nteleporter];
-        //#e
 
         // On tous les elements
         printf("E\n");
@@ -66,10 +65,11 @@ Labyrinthe::Labyrinthe (char* filename){
 
 	//#s
 	printf("G\n");
-	makePCC(density, distance);
+	computeDistances();
 	//#e
 
 	printf("%d  x %d\n", width(), height());
+	_ambiance->play(.5);
 }
 
 void Labyrinthe::readFile(string fname){
@@ -80,7 +80,7 @@ void Labyrinthe::readFile(string fname){
 	int width =  0;
 	int height = 0;
 	char c = ' ';
-	
+
 	regex comment("^#");
 	regex rtex("[[:alpha:]]+[[:digit:]]*[[:alpha:]]*\\.jpg");
 	regex letter_Not_x("^(\\s*)([a-wy-z]|@)");
@@ -114,13 +114,13 @@ void Labyrinthe::readFile(string fname){
 				}
 			}
 		}
-		
-		printf("END %d , %d\n",width, height);
+
+		printf("END %d , %d\n", width, height);
 		cout << "Taille du labyrinthe calculer dans le fichier " <<  width << " x " << height << endl;
-		lab_width = width;
-		lab_height = height;
-		createMat(ascii, lab_width, lab_height);
-		fillMat(ascii, c, lab_width, lab_height);
+		_width = width;
+		_height = height;
+		createMat(ascii, _width, _height);
+		fillMat(ascii, c, _width, _height);
 		in.ignore();
 		in.clear();
 		in.seekg(lab_start);
@@ -147,8 +147,8 @@ void Labyrinthe::printInFileMat(const Mat<int>& A, const char* fname){
 	ofstream out(fname);
 	if(out)  //On teste si tout est OK
 	{
-		for (int i = 0; i < lab_height; i++) {
-			for (int j = 0; j < lab_width; j++) {
+		for (int i = 0; i < _height; i++) {
+			for (int j = 0; j < _width; j++) {
 				out << setfill('0') << setw(1) << A[i][j] << " ";
 			}
 			out << endl;
@@ -160,51 +160,22 @@ void Labyrinthe::printInFileMat(const Mat<int>& A, const char* fname){
 	}
 }
 
-void Labyrinthe::makeDensity(Mat<char> A, Mat<int>& B){
-
-	createMat(B, lab_width, lab_height);
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
-			if (A[i][j] == '+'
-			|| A[i][j] == '-'
-			|| A[i][j] == '|'
-			|| A[i][j] == 'a'
-			|| A[i][j] == 'b') {  // regex match cij ([a-w-yz] ou + ou - ou | ou x ou G ou T
-				B[i][j] = MUR;
-			}else if(A[i][j] == 'C'){
-				B[i][j] = CHASSEUR;
-			}else if(A[i][j] == 'G'){
-				B[i][j] = GARDIEN;
-			}else if(A[i][j] == 'T'){
-				B[i][j] = TRESOR;
-			}else if(A[i][j] == '#'){
-				B[i][j] = PORTAL;
-			}else if(A[i][j] == 'x'){
-				B[i][j] = BOX;
-			}else{
-				B[i][j] = EMPTY;
-			}
-		}
-	}
-	printInFileMat(B, "density");
-}
-
 int Labyrinthe::countWalls(Mat<char> A){
 
 	int k = 0;
 	bool close = true;
-	
+
 	// Murs Horizontaux
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++){
 			if(A[i][j] == '+'){
 				close = !close;
 				if(!close){
 
 				}else if(close){
 					k++;
-					if(j < lab_width - 1){
-						if(A[i][j + 1] == '-' || A[i][j + 1] == '+' || A[i][j + 1] == '@' 
+					if(j < _width - 1){
+						if(A[i][j + 1] == '-' || A[i][j + 1] == '+' || A[i][j + 1] == '@'
 						|| ((A[i][j + 1] >= 'a' && A[i][j + 1] <= 'z') && A[i][j + 1] != 'x')){
 							close = !close;
 						}
@@ -215,16 +186,16 @@ int Labyrinthe::countWalls(Mat<char> A){
 	}
 
 	// Murs Verticaux
- 	for(int j = 0; j < lab_width; j++){
-		for(int i = 0; i < lab_height; i++){
+ 	for(int j = 0; j < _width; j++){
+		for(int i = 0; i < _height; i++){
 			if(A[i][j] == '+'){
 				close = !close;
 				if(!close){
-					
+
 				}else if(close){
 					k++;
-					if(i < lab_height - 1){
-						if(A[i + 1][j] == '|' || A[i + 1][j] == '+' || A[i + 1][j] == '@' 
+					if(i < _height - 1){
+						if(A[i + 1][j] == '|' || A[i + 1][j] == '+' || A[i + 1][j] == '@'
 						|| ((A[i + 1][j] >= 'a' && A[i + 1][j] <= 'z') && A[i + 1][j]!= 'x')){
 							close = !close;
 						}
@@ -238,13 +209,12 @@ int Labyrinthe::countWalls(Mat<char> A){
 
 void Labyrinthe::countAllData(Mat<char> A){
 	int k = 0, g = 0, m = 0;
-	int t = 0;
 	_nwall = countWalls(A);
 
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++){
                         //#s
-                        if(A[i][j] == 'x' || A[i][j] == '#'){
+                        if(A[i][j] == 'x' || A[i][j] == '%'){
 				k++;
 			}
                         //#e
@@ -257,8 +227,8 @@ void Labyrinthe::countAllData(Mat<char> A){
                             }
 			}
                         //#s
-			if(A[i][j] == '#'){
-				t++;
+			if(A[i][j] == '%'){
+                            //??
 			}
                         //#e
 		}
@@ -266,7 +236,6 @@ void Labyrinthe::countAllData(Mat<char> A){
 	_nboxes = k;
 	_nguards = g;
 	_npicts = m;
-	_nteleporter = t;
 }
 
 void Labyrinthe::findTex(char tmp[], const char c){
@@ -287,12 +256,12 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 	int k = 0, g = 0; /** * //#s , t = 0; * //#e */
 	int h = 0, v = 0;
 	bool close = true;
-	cout << "Taille envoyer a sortWall " << lab_width << " x " << lab_height << endl;
+	cout << "Taille envoyer a sortWall " << _width << " x " << _height << endl;
 
 	printf("Dprime1\n");
 	// Murs Horizontaux
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++){
 			if(A[i][j] == '+'){
 				close = !close;
 				if(!close){
@@ -305,7 +274,7 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 					_walls[k]._ntex = 0;
 					h++;
 					k++;
-					if(j < lab_width - 1){
+					if(j < _width - 1){
 						if(A[i][j + 1] == '-' || A[i][j + 1] == '+'){
 							_walls[k]._x1 = i;
 							_walls[k]._y1 = j;
@@ -325,15 +294,15 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 					if(A[i][j] == '@'){
 						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
 						_picts[g]._ntex = wall_texture (tmp);
-                                                /**
-                                                 * //#s
-                                                _teleporters._t[t] = &_picts[g];						
+                        /**
+                         * //#s
+                        _teleporters._t[t] = &_picts[g];
 						t++;
-                                                 * //#e
-                                                 */
+                         * //#e
+                         */
 					}else{
 						findTex(tmp, A[i][j]);
-						_picts[g]._ntex = wall_texture (tmp);              
+						_picts[g]._ntex = wall_texture (tmp);
 					}
 					g++;
 				}
@@ -342,8 +311,8 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 	}
 	printf("Dprime2\n");
 	// Murs Verticaux
- 	for(int j = 0; j < lab_width; j++){
-		for(int i = 0; i < lab_height; i++){
+ 	for(int j = 0; j < _width; j++){
+		for(int i = 0; i < _height; i++){
 			if(A[i][j] == '+'){
 				close = !close;
 				if(!close){
@@ -356,7 +325,7 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 					_walls[k]._ntex = 0;
 					v++;
 					k++;
-					if(i < lab_height - 1){
+					if(i < _height - 1){
 						if(A[i+1][j] == '|' || A[i+1][j] == '+'){
 							_walls[k]._x1 = i;
                             _walls[k]._y1 = j;
@@ -371,20 +340,20 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
                     _picts[g]._y1 = j;
                     _picts[g]._x2 = i+1;
                     _picts[g]._y2 = j;
-                     
-                    char tmp[128];      
+
+                    char tmp[128];
                     	if(A[i][j] == '@'){
 						sprintf (tmp, "%s/%s", texture_dir, "portal.jpg");
 						_picts[g]._ntex = wall_texture (tmp);
 						/**
                                                  * //#s
-                                                _teleporters._t[t] = &_picts[g];						
+                                                _teleporters._t[t] = &_picts[g];
 						t++;
                                                  * //#e
                                                  */
-					}else{						
+					}else{
 						findTex(tmp, A[i][j]);
-						_picts[g]._ntex = wall_texture (tmp);                    
+						_picts[g]._ntex = wall_texture (tmp);
 					}
 					g++;
 				}
@@ -398,10 +367,10 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 
 void Labyrinthe::sortElements(Mat<char> A){
 
-	int k = 0, t =0;
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
-			if((A[i][j] == 'x') || (A[i][j] == '#')) {
+	int k = 0;
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++){
+			if((A[i][j] == 'x') || (A[i][j] == '%')) {
 				_boxes[k]._x = i;
 				_boxes[k]._y = j;
 				k++;
@@ -409,14 +378,11 @@ void Labyrinthe::sortElements(Mat<char> A){
 			if(A[i][j] == 'T'){
 				_treasor._x = i;
 				_treasor._y = j;
-			} 
-                        //#s
-                        if(A[i][j] == '#') {
-				_teleporters[t]._x = i;
-				_teleporters[t]._y = j;
-                                t++;
 			}
-                        //#e
+                //#s
+            if(A[i][j] == '%'){
+			}
+                //#e
 		}
 	}
 }
@@ -428,8 +394,8 @@ void Labyrinthe::sortMovers(Mat<char> A){
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> g(0, guardianName.size()-1);
 
-	for(int i = 0; i < lab_height; i++){
-		for(int j = 0; j < lab_width; j++){
+	for(int i = 0; i < _height; i++){
+		for(int j = 0; j < _width; j++){
 			if(A[i][j] == 'C'){
 				_guards[0] = new Chasseur(this, i*Environnement::scale, j*Environnement::scale);
 			}
@@ -443,111 +409,203 @@ void Labyrinthe::sortMovers(Mat<char> A){
 /**
  ** Ajouter Dijkstra ici !!!
  **/
-// Mercredi
-// jeudi 11 et vendredi 12 Soutenance
 
 //#s
-void Labyrinthe::makePCC(Mat<int> A, Mat<int>& B){
-	
-	//
-	createMat(B, lab_width, lab_height);
+// Public methods
 
-    // Position tresor
-    coord p;
-    p.i = _treasor._x;
-	p.j = _treasor._y;
-	//
-	int i_x = p.i;
-    	int j_y = p.j;
-	
-    	Mat<bool> visited;
-    	createMat(visited, lab_width, lab_height);
-	//
-	for (int i = 0; i < lab_height; i++) {
-		for (int j = 0; j < lab_width; j++) {
-			visited[i][j] = !isAccessible(i,j);
-	            	distance[i][j] = INT_MAX;
-		}
-	}
-	//
-	distance[i_x][j_y] = 0;
-	//
-	vector<coord>  unexplored;
-	unexplored.push_back(p);
-	//
-    	while (!unexplored.empty()) {
-        	//
-        	p = unexplored.back();
-		//
-        	i_x = p.i;
-	        j_y = p.j;
-		//
-	        unexplored.pop_back();
-		//
-		for (int k = -1; k <= 1; k++) {
-			for (int l = -1; l <= 1; l++) {
-				if (isAccessible(i_x + k, j_y + l) && !visited[i_x + k][j_y + l]) {
-					p.i = i_x + k;
-					p.j = j_y + l;
-					unexplored.push_back(p);
-				}
-			}
-		}
-		//
-        	visited[i_x][j_y] = true;
-		//
-		for (int k = -1; k <= 1; k++) {
-			//
-			for (int l = -1; l <= 1; l++) {
-				if (isAccessible(i_x + k, j_y + l) && (distance[i_x + k][j_y + l] > (distance[i_x][j_y] + 1))) {
-					distance[i_x + k][j_y + l] = distance[i_x][j_y] + 1;
-				}
-			}		
-		}
-
-    }
-	printInFileMat(B, "distance");
+//
+bool Labyrinthe::isValid(int x, int y) {
+    return (x >= 0 && x < _height) && (y >= 0 && y < _width);
 }
 
 //
 bool Labyrinthe::isAccessible(int x, int y) {
-	return (x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] != MUR) && (density[x][y] != TRESOR) && (density[x][y] != BOX ) && (density[x][y] != CHASSEUR);
+    return isValid(x, y) && _density[x][y] != MUR && _density[x][y] != TRESOR && _density[x][y] != BOX;
+}
+
+//
+bool Labyrinthe::isFree(int x, int y) {
+    return isValid(x, y) && _density[x][y] == EMPTY;
+}
+
+//
+bool Labyrinthe::isFree(double x, double y, Mover* mover) {
+
+    int _x = (mover->_x + x) / Environnement::scale;
+    int _y = (mover->_y + y) / Environnement::scale;
+
+    return ((_x == ((int) mover->_x / Environnement::scale)) && (_y == ((int) mover->_y / Environnement::scale))) || isFree(_x, _y);
+
 }
 
 //
 int Labyrinthe::getDistance(int x, int y) {
-	if (isAccessible(x, y)){
-            return distance[x][y];
-        }
-	return INT_MAX;
+    if (isAccessible(x, y)){
+        return _distances[x][y];
+    }
+    return INT_MAX;
 }
 
 //
-bool Labyrinthe::removeBox(int x, int y) {
-	// Vérification : si c'est bien une caisse et qu'on se trouve dans le Lab..
-	if ((x >= 0 && x < lab_height) && (y >= 0 && y < lab_width) && (density[x][y] == BOX)){
+bool Labyrinthe::update(int x, int y) {
+    if (!isAccessible(x, y) && updateBox(x, y)) {
+         reconfigure();
+         return true;
+    }
+    return false;
+}
 
-		for (int index = 0; index < _nboxes; index++){
-			
-			if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
-				density[x][y] = EMPTY;
-                                updateDistance(x, y);
-				memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
-				_nboxes--; 
-				reconfigure();
-				return true;
-		   }
+//
+bool Labyrinthe::update(double x, double y, Mover* mover) {
+
+    if(isFree(x, y, mover)) {
+
+        int i = mover->_x / Environnement::scale;
+        int j = mover->_y / Environnement::scale;
+
+        int code = _density[i][j];
+
+        _density[i][j] = EMPTY;
+
+        mover->_x += x;
+        mover->_y += y;
+
+        int k = mover->_x / Environnement::scale;
+        int l = mover->_y / Environnement::scale;
+
+        _density[k][l] = code;
+
+        return true;
+
+    }
+
+    return false;
+
+}
+
+//
+void Labyrinthe::free(int x, int y) {
+    if (isValid(x, y)) {
+        _density[x][y] = EMPTY;
+    }
+}
+
+//
+void Labyrinthe::free(Mover* mover) {
+
+    _density[((int) mover->_x / Environnement::scale)][((int) mover->_y / Environnement::scale)] = EMPTY;
+
+}
+
+// Private methods
+
+//
+void Labyrinthe::computeDensity(vector<vector<char>> codes) {
+
+    for(int i = 0; i < _height; i++) {
+	for(int j = 0; j < _width; j++) {
+
+            _density.push_back(vector<int>(_width));
+
+            if (codes[i][j] == '+' || codes[i][j] == '-' || codes[i][j] == '|' || codes[i][j] == 'a' || codes[i][j] == 'b')
+                _density[i][j] = MUR;
+            else if(codes[i][j] == 'C')
+		_density[i][j] = CHASSEUR;
+            else if(codes[i][j] == 'G')
+		_density[i][j] = GARDIEN;
+            else if(codes[i][j] == 'T')
+		_density[i][j] = TRESOR;
+            else if(codes[i][j] == '%')
+		_density[i][j] = PORTAL;
+            else if(codes[i][j] == 'x')
+		_density[i][j] = BOX;
+            else
+		_density[i][j] = EMPTY;
+
+        }
+    }
+
+}
+
+//
+void Labyrinthe::computeDistances(){
+
+    vector<vector<bool>> visited;
+
+    for (int i = 0; i < _height; i++) {
+        for (int j = 0; j < _width; j++) {
+
+            visited.push_back(vector<bool>(_width));
+            _distances.push_back(vector<int>(_width));
+
+            visited[i][j] = !isAccessible(i,j);
+            _distances[i][j] = INT_MAX;
+
+        }
+    }
+
+    // Treasor distance
+    _distances[_treasor._x][_treasor._y] = 0;
+
+    // Unexplored cells
+    vector<pair<int, int>>  unexplored;
+    unexplored.push_back(make_pair(_treasor._x, _treasor._y));
+
+    //
+    while (!unexplored.empty()) {
+
+        //
+        pair<int, int> cell = unexplored.back();
+        unexplored.pop_back();
+
+        //
+	for (int k = -1; k <= 1; k++) {
+            //
+            for (int l = -1; l <= 1; l++) {
+                int i = cell.first + k;
+                int j = cell.second + l;
+                //
+		if (isAccessible(i, j) && !visited[i][j]) {
+                    unexplored.push_back(make_pair(i, j));
+                    //
+                    if (_distances[i][j] > (_distances[cell.first][cell.second] + 1)) {
+			_distances[i][j] = _distances[cell.first][cell.second] + 1;
+                    }
 		}
+            }
 	}
-	return false;
+
+        //
+        visited[cell.first][cell.second] = true;
+
+    }
+
+}
+
+//
+bool Labyrinthe::updateBox(int x, int y) {
+    if (_density[x][y] == BOX){
+        for (int index = 0; index < _nboxes; index++) {
+            // Remove box
+            if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
+                _density[x][y] = EMPTY;
+                updateDistance(x, y);
+                memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
+                _nboxes--;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //
 int Labyrinthe::updateDistance(int x, int y) {
     for (int i = -1; i <= 1; i++) {
 	for (int j = -1; j <= 1; j++) {
-            distance[x][y] = min(distance[x][y], getDistance(x + i, y + j));
+            _distances[x][y] = min(_distances[x][y], getDistance(x + i, y + j));
 	}
     }
-    return distance[x][y]++;    
-}//#e
+    return _distances[x][y]++;
+}
+//#e

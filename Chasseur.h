@@ -19,6 +19,7 @@ class Chasseur : public Mover {
 		static Sound*	_hunter_hit;	// cri du chasseur touché.
 		static Sound*	_wall_hit;		// on a tapé un mur.
 		int _pv;
+		bool first, pas_encore_lose;
 		
 	public:
 		Chasseur (Labyrinthe* l, int x, int y);

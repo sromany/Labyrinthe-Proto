@@ -17,7 +17,7 @@ WLIBS		= $(WLIBGLUT) -defaultlib:OPENGL32 -defaultlib:GLU32 gdi32.lib jpeg/libjp
 MLIBS		= -framework GLUT -framework OpenGL -framework Foundation jpeg/libjpeg.a /Developer/FMOD\ Programmers\ API\ Mac/api/lib/libfmodex.dylib
 
 CXX			= g++
-CXXFLAGS	= -I $(MFMOD) -I $(FMOD) -I jpeg -O4 -Wall
+CXXFLAGS	= -I $(MFMOD) -I $(FMOD) -I jpeg -O4 -Wall -std=c++11
 CPP			= cl -nologo
 CPPFLAGS	= -GX -GR -MD -O2 -I $(WFMOD) -I $(WINCGLUT) -I jpeg
 
