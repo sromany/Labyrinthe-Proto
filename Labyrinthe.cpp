@@ -386,7 +386,7 @@ bool Labyrinthe::isAccessible(int x, int y) {
 
 //
 bool Labyrinthe::isFree(int x, int y) {
-	printf("%d , %d\n", x ,y);
+	
     return isValid(x, y) && _density[x][y] == EMPTY;
 }
 
@@ -411,28 +411,20 @@ int Labyrinthe::getDistance(int x, int y) {
 //
 bool Labyrinthe::update(double x, double y, Mover* mover) {
 
-	printf("A\n");
     if(isFree(x, y, mover)) {
-	printf("B\n");
         int i = (int)(mover->_x / Environnement::scale);
         int j = (int)(mover->_y / Environnement::scale);
-	printf("C\n");
         int code = _density[i][j];
         char sym = _ascii[i][j];
-	printf("D\n");
         _density[i][j] = EMPTY;
         _ascii[i][j] = ' ';
 
-	printf("E\n");
         mover->_x += x;
         mover->_y += y;
-	printf("F\n");
         int k = (int)(mover->_x / Environnement::scale);
         int l = (int)(mover->_y / Environnement::scale);
-	printf("G\n");
         _density[k][l] = code;
         _ascii[k][l] = sym;
-	printf("H\n");
         return true;
     }
 	
@@ -629,33 +621,14 @@ void Labyrinthe::computeDistances(){
 bool Labyrinthe::updateBox(int x, int y) {
     if (_density[x][y] == BOX){
         for (int index = 0; index < _nboxes; index++) {
+            // Remove box
             if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
-                
-                map<int*, int>::iterator cell = _objects.find(&_density[x][y]);
-                
-                // Remove box                                                
+                _density[x][y] = EMPTY;
+                _ascii[x][y] = ' ';
+                updateDistance(x, y);
                 memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
                 _nboxes--;
-                
-                if(cell == _objects.end()) {
-                    _density[x][y] = EMPTY;
-                } else if (cell->first == &_density[x][y]) {
-                    // Add guardian
-                    if(cell->second == GARDIEN) {
-                                                
-                    }  
-                    
-                    _objects.erase(cell); 
-                     
-                }
-                
-                // Remove this ligne if we can add a guardian
-                _density[x][y] = EMPTY;
-                
-                updateDistance(x, y);
-                
                 return true;
-                
             }
         }
     }

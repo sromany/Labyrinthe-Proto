@@ -66,4 +66,3 @@ class Gardien : public Mover {
 };
 
 #endif
-

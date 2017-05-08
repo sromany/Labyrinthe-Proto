@@ -80,8 +80,8 @@ void Gardien::update(void) {
     }
 
 	if(this->_pv > 0){
-		//~ if(seekHunter()){
-		if(_behavior == PATROUILLE){
+		if(seekHunter()){
+		//~ if(_behavior == PATROUILLE){
 			if(fm.trigger == false)
 			{
 				fire(0);
@@ -150,7 +150,7 @@ void Gardien::fire (int angle_vertical) {
     float	dist2 = (x*x + y*y);
     float	dmax2 = (float)((_l -> width ())*(_l -> width ()) + (_l -> height ())*(_l -> height ())) * Environnement::scale;
 
-    _guard_fire -> play (exp(.0000000001 - dist2/dmax2));
+    _guard_fire -> play (exp(.000000001 - dist2/dmax2));
 	_fb -> init (_x, _y, 10.,                 /* position initiale de la boule xyz */
 				 angle_vertical, -_angle);    /* angle de visée vertical - horizontal */
 	fd.start = clock();
@@ -175,9 +175,7 @@ bool Gardien::process_fireball (float dx, float dy)
 	}else if(next_y >= _l->height()){
 		next_y = _l->height()-1;
 	}
-	//~ printf("G\n");
-	//~ printf("%d , %d \n",(int)((_fb -> get_x () + dx) / Environnement::scale),
-						//~ (int)((_fb -> get_y () + dy) / Environnement::scale));
+	
 	// on bouge que dans le vide !
 	if (((Labyrinthe *)_l)->isFree(next_x,next_y))
 	{
@@ -233,10 +231,10 @@ bool Gardien::process_fireball (float dx, float dy)
 
 
 bool Gardien::seekHunter(){
-	//~ // Je travaille ICI !!!!
-	// Ici on fait l'équation de la droite entre this et chasseur
+	// Ici on calcule l'équation de la droite entre this et chasseur
 	// et on la parcours avec un pas dx et dy
 	Chasseur * chasseur = ((Chasseur *) ((Labyrinthe *)_l)->_guards[0]);
+	int tmp = _behavior;
 	float dr, dx = _x, dy = _y;
 	float step = 0.1;
 	float m = (chasseur->_y - _y) / (chasseur->_x -_x);
@@ -247,13 +245,15 @@ bool Gardien::seekHunter(){
 		step *= -1.0;
 	}
 	
-	while(((Labyrinthe*) _l)->isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)))){
+	while(((Labyrinthe*) _l)->isAccessible((int)(dx / Environnement::scale), (int)(dy / Environnement::scale))){
 		dx += step;
-		dy = m*dx + p;
+		dy = m * dx + p;
 		dr = (dx - chasseur->_x) * (dx - chasseur->_x) + (dy - chasseur->_y)*(dy - chasseur->_y);
-		if(dr > -0.7 || dr < 0.7){
-			//~ _angle = 1. / cos((dx - _x) / dist);
-			printf("TRUE\n");
+		if(dr > -0.2 && dr < 0.2){
+			//~ _angle = 1. / (((dx - _x) / dist));
+			if (_angle < 0) {
+				_angle += 360;
+			}
 			return true;
 		}
 	}
@@ -337,21 +337,18 @@ void Gardien::setAngle() {
 		// Do nothing because the minimum octant is already known
 
 		//
-		if (_behavior == PATROUILLE) {
+			if (_behavior == PATROUILLE) {
+				//
+				uniform_int_distribution<> direction(0, octants.size() - 1);
+				//
+				index = direction(rng);
+			}
+			// Retrieve octant
+			int octant = octants[index].first;
 			//
-			uniform_int_distribution<> direction(0, octants.size() - 1);
+			uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
 			//
-			index = direction(rng);
-		}
-
-		// Retrieve octant
-		int octant = octants[index].first;
-
-		//
-		uniform_int_distribution<> angle(((octant - 1) * 45) - 22.5, (octant * 45) - 21.5);
-
-		//
-		_angle = angle(rng);
+			_angle = angle(rng);
     //
     if (_angle < 0) {
         _angle += 360;
