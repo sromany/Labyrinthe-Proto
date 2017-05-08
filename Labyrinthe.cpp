@@ -15,6 +15,7 @@ Sound*	Gardien::_wall_hit;	    // un gardien a tapé un mur.
 Sound*  Labyrinthe::_win;
 Sound*  Labyrinthe::_lose;
 Sound*  Labyrinthe::_ambiance;
+Sound*  Labyrinthe::_save;
 
 Environnement* Environnement::init (char* filename)
 {
@@ -25,13 +26,14 @@ Labyrinthe::Labyrinthe (char* filename){
 	_win = new Sound ("sons/win.wav");
 	_lose = new Sound ("sons/lose.wav");
 	_ambiance = new Sound ("sons/ambiance.wav");
+	_save = new Sound ("sons/miaou.wav");
 	readFile(string(filename));
 
 	cout << "Nombre de murs: " << _nwall << endl;
 	cout << "Nombre d'affiches: " << _npicts << endl;
 	cout << "Nombre de boites: " << _nboxes << endl;
 	cout << "Nombre de movers: " << _nguards << endl;
-	printMat(ascii, _width, _height);
+	printMat(_ascii, _width, _height);
 	
 	// On stock les murs
 	_walls = new Wall[_nwall];
@@ -41,7 +43,7 @@ Labyrinthe::Labyrinthe (char* filename){
 	_picts = new Wall[_npicts];
 
 	printf("D\n");
-	sortWallsAndPicts(ascii);
+	sortWallsAndPicts(_ascii);
 	// On stock les boxes.
 	printf("Dprime %d\n", _nboxes);
 	_boxes = new Box[_nboxes];
@@ -51,7 +53,7 @@ Labyrinthe::Labyrinthe (char* filename){
 
 	//#s
         //
-        computeDensity(ascii);
+        computeDensity(_ascii);
         //
 	computeDistances();
 	//#e
@@ -107,8 +109,8 @@ void Labyrinthe::readFile(string fname){
 		cout << "Taille du labyrinthe calculer dans le fichier " <<  width << " x " << height << endl;
 		_width = width;
 		_height = height;
-		createMat(ascii, _width, _height);
-		fillMat(ascii, c, _width, _height);
+		createMat(_ascii, _width, _height);
+		fillMat(_ascii, c, _width, _height);
 		in.ignore();
 		in.clear();
 		in.seekg(lab_start);
@@ -117,17 +119,16 @@ void Labyrinthe::readFile(string fname){
 		while(getline(in,line)){
 			printf("EACH LINE\n");
 			for(int j = 0; j < int(line.length()); j++){
-				ascii[i][j] = line[j];
+				_ascii[i][j] = line[j];
 				printf("%d , %d \n", i, j);
 			}
 			i++;
 		}
-
 	}else{
 		cout << "ERREUR: Impossible d'ouvrir le fichier en lecture." << endl;
 	}
 	printf("END AGAIN\n");
-	countAllData(ascii);
+	countAllData(_ascii);
 	printf("COUNT DATA\n");
 }
 
@@ -138,6 +139,23 @@ void Labyrinthe::printInFileMat(const Mat<int>& A, const char* fname){
 		for (int i = 0; i < _height; i++) {
 			for (int j = 0; j < _width; j++) {
 				out << setfill('0') << setw(1) << A[i][j] << " ";
+			}
+			out << endl;
+		}
+	}
+	else
+	{
+		cout << "ERREUR: Impossible d'ouvrir le fichier." << endl;
+	}
+}
+
+void Labyrinthe::printInFileMat(const Mat<char>& A, const char* fname){
+	ofstream out(fname);
+	if(out)  //On teste si tout est OK
+	{
+		for (int i = 0; i < _height; i++) {
+			for (int j = 0; j < _width; j++) {
+				out << A[i][j];
 			}
 			out << endl;
 		}
@@ -400,8 +418,11 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
         int j = (int)(mover->_y / Environnement::scale);
 	printf("C\n");
         int code = _density[i][j];
+        char sym = _ascii[i][j];
 	printf("D\n");
         _density[i][j] = EMPTY;
+        _ascii[i][j] = ' ';
+
 	printf("E\n");
         mover->_x += x;
         mover->_y += y;
@@ -410,6 +431,7 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
         int l = (int)(mover->_y / Environnement::scale);
 	printf("G\n");
         _density[k][l] = code;
+        _ascii[k][l] = sym;
 	printf("H\n");
         return true;
     }
@@ -567,6 +589,7 @@ bool Labyrinthe::updateBox(int x, int y) {
             // Remove box
             if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
                 _density[x][y] = EMPTY;
+                _ascii[x][y] = ' ';
                 updateDistance(x, y);
                 memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
                 _nboxes--;

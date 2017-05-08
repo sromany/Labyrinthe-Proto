@@ -78,12 +78,6 @@ bool Chasseur::process_fireball (float dx, float dy)
 
 	// collision...
 	// calculer la distance maximum en ligne droite.
-
-    //#s
-    // Update the labyrinth
-    //((Labyrinthe*) _l)->update(next_x, next_y,);
-    //#e
-
 	for(int i = 1; i <_l->_nguards; i++){
             if((int)(_l->_guards[i]->_x / Environnement::scale) == next_x
             && (int)(_l->_guards[i]->_y / Environnement::scale) == next_y){

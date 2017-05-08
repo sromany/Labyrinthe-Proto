@@ -43,7 +43,7 @@ Gardien::Gardien(Labyrinthe* l, int x, int y, const char* modele) : Mover (x, y,
 
 // Le gardien pense ici
 void Gardien::update(void) {
-
+	
     if (this == _l->_guards[1]) {
         _potentiel_max = 0;
         _distance_max = 0;
@@ -105,8 +105,19 @@ void Gardien::update(void) {
     //#e
 	message ("PV : %d", ((Chasseur *) ((Labyrinthe *)_l)->_guards[0])->_pv);
 
-	//~ ((Labyrinthe *)_l)->printInFileMat(((Labyrinthe *)_l)->density, "check.txt");
-	//  Tkt pas Ici je print Density pour savoir où le chasseur se trouve.
+	//~ //  Autosave de l'état du labyrinthe en ascii toutes les 30 secs
+	//~ //  Encore a travailler
+		//~ static clock_t autosave = clock();
+		//~ clock_t checkpoint;
+	//~ checkpoint = clock();
+	//~ int timer = 1000 * (checkpoint - autosave)/CLOCKS_PER_SEC;
+	//~ if(timer%3000 == 0){
+		//~ ((Labyrinthe *)_l)->printInFileMat(((Labyrinthe *)_l)->_ascii, "save.txt");
+		//~ ((Labyrinthe *)_l)->_save->play();
+		//~ printf("Save...\n");
+		//~ autosave = clock();
+	//~ }
+
 }
 
 //#s
@@ -167,17 +178,11 @@ bool Gardien::process_fireball (float dx, float dy)
 	//~ printf("%d , %d \n",(int)((_fb -> get_x () + dx) / Environnement::scale),
 						//~ (int)((_fb -> get_y () + dy) / Environnement::scale));
 
-
 	// on bouge que dans le vide !
 	if (((Labyrinthe *)_l)->isFree(next_x,next_y))
 	{
 		return true;
 	}
-
-	//#s
-	// Update the labyrinth
-        ((Labyrinthe*) _l)->update(next_x, next_y);
-	//#e
 
 	//~ // Sinon collision...
 	//~ // Si la prochaine case contient du chasseur
@@ -220,9 +225,10 @@ bool Gardien::process_fireball (float dx, float dy)
 
 
 bool Gardien::seekHunter(){
-	
+	//~ // Je travaille ICI !!!!
 	// Ici on fait l'équation de la droite entre this et chasseur
 	// et on la parcours avec un pas dx et dy
+	Chasseur * chasseur = ((Chasseur *) ((Labyrinthe *)_l)->_guards[0]);
 	float dx = _x, dy = _y;
 	float step = 0.1;
 	float m = (chasseur->_y - _y) / (chasseur->_x -_x);
@@ -232,11 +238,11 @@ bool Gardien::seekHunter(){
 		step *= -1.0;
 	}
 	
-	while(_l->isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)){
-		dx += step;
-		dy = m*dx + p;
-		if(dx > )
-	}
+	//~ while((Labyrinthe*) _l)>isAccessible((int)(dx / (float)(Environnement::scale)), (int)(dy / (float)(Environnement::scale)){
+		//~ dx += step;
+		//~ dy = m*dx + p;
+		//~ if(dx > )
+	//~ }
 		
 	return true;
 }
@@ -286,7 +292,7 @@ void Gardien::setAngle() {
     index = 0;
 
     // Loop all octants
-    for (int i = 0; i < octants.size(); i++) {
+    for (unsigned int i = 0; i < octants.size(); i++) {
 
         // Retrieve octant position
         int dx = octants[i].second.first;
