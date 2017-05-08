@@ -108,7 +108,7 @@ class Labyrinthe : public Environnement {
         map<int*, int> _objects;      
     // Public methods       
     public:
-        bool inline isValid(int x, int y);
+        bool isValid(int x, int y);
         bool isAccessible(int x, int y);
         bool isFree(int x, int y);
         bool isFree(double, double, Mover*);
@@ -116,11 +116,12 @@ class Labyrinthe : public Environnement {
         bool update(double, double, Mover*);
         void free(int x, int y);
         void free(Mover*);
+        bool updateBox(int x, int y);
     // Private methods
     private:    
         void computeDensity(vector<vector<char>>);
         void computeDistances();
-        bool updateBox(int x, int y);
+        //
         int updateDistance(int x, int y);            
     //#e    
 		

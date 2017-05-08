@@ -357,7 +357,7 @@ void Labyrinthe::sortWallsAndPicts(Mat<char> A){
 // Public methods
 
 //
-bool inline Labyrinthe::isValid(int x, int y) {
+bool Labyrinthe::isValid(int x, int y) {
     return (x >= 0 && x < _height) && (y >= 0 && y < _width);
 }
 
@@ -564,13 +564,33 @@ void Labyrinthe::computeDistances(){
 bool Labyrinthe::updateBox(int x, int y) {
     if (_density[x][y] == BOX){
         for (int index = 0; index < _nboxes; index++) {
-            // Remove box
             if((_boxes[index]._x == x) && (_boxes[index]._y == y)){
-                _density[x][y] = EMPTY;
-                updateDistance(x, y);
+                
+                map<int*, int>::iterator cell = _objects.find(&_density[x][y]);
+                
+                // Remove box                                                
                 memmove(_boxes + index, _boxes + index + 1, (_nboxes - index - 1) * sizeof(Box));
                 _nboxes--;
+                
+                if(cell == _objects.end()) {
+                    _density[x][y] = EMPTY;
+                } else if (cell->first == &_density[x][y]) {
+                    // Add guardian
+                    if(cell->second == GARDIEN) {
+                                                
+                    }  
+                    
+                    _objects.erase(cell); 
+                     
+                }
+                
+                // Remove this ligne if we can add a guardian
+                _density[x][y] = EMPTY;
+                
+                updateDistance(x, y);
+                
                 return true;
+                
             }
         }
     }
