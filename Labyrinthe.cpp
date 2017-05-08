@@ -62,7 +62,7 @@ Labyrinthe::Labyrinthe (char* filename){
 	//#e
 
 	printf("%d  x %d\n", width(), height());
-	//~ _ambiance->play(.8);
+	_ambiance->play(.8);
 }
 
 void Labyrinthe::readFile(string fname){
@@ -467,7 +467,7 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
 	printf("D\n");
         _density[i][j] = EMPTY;
 	printf("E\n");
-        mover->_x += x * cos(mover->_angle);
+        mover->_x += x * cos(mover-> _angle);
         mover->_y += y * sin(mover->_angle);
 	printf("F\n");
         int k = (int)(mover->_x / Environnement::scale);
@@ -480,11 +480,8 @@ bool Labyrinthe::update(double x, double y, Mover* mover) {
         _density[k][l] = code;
 	printf("H\n");
         return true;
-
     }
-
     return false;
-
 }
 
 //

@@ -59,7 +59,6 @@ void Gardien::update(void) {
 				_distance_max = max(_distance_max, distance);
 			}
         }
-
     }
 
 	coord posGardien;
@@ -80,9 +79,8 @@ void Gardien::update(void) {
 		}
     }
 
-
 	if(this->_pv > 0){
-		if(!seekHunter()){
+		if(seekHunter()){
 			if(fm.trigger == false)
 			{
 				fire(0);
@@ -100,7 +98,7 @@ void Gardien::update(void) {
 			}
 		//#s
 		}
-		move(0.3, 0.3);
+		//~ move(0.3, 0.3);
 	}else{
 		rester_au_sol();
 	}
@@ -127,12 +125,12 @@ bool Gardien::move (double dx, double dy) {
 	//~ int next_step = _l -> data (next_x,	next_y);
 
 	//if (((Labyrinthe *) _l)->isFree(dx, dy, this)){
-            //~ _x += dx * cos(_angle);
-            //~ _y += dy * sin(_angle);
-            //~ _x += dx * sin(_angle);
-            //~ _y += dy * (-cos(_angle));
-            return ((Labyrinthe *)_l)->update(dx, dy, this);
-            //return true;
+		//~ _x += dx * cos(_angle);
+		//~ _y += dy * sin(_angle);
+		//~ _x += dx * sin(_angle);
+		//~ _y += dy * (-cos(_angle));
+		return ((Labyrinthe *)_l)->update(dx, dy, this);
+		//return true;
 	//}
 
     setAngle();
@@ -236,7 +234,7 @@ bool Gardien::seekHunter(){
 }
 
 bool Gardien::targetHunter(){
-	return true;
+	return _behavior == DEFENSE;
 }
 //#s
 
